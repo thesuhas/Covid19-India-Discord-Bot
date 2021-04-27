@@ -25,5 +25,14 @@ async def on_ready():
     df = pd.read_csv(data, sep=",")
     df.to_csv(filename)
 
+@client.command()
+async def state(ctx, state):
+    entry = df.loc[df['State'] == state]
+    if entry.empty:
+        await ctx.send("Chosen state not available")
+    else:
+        m = f"**Covid Cases in {state}:**\nConfirmed: {entry['Confirmed'].values[0]}\nRecovered: {entry['Recovered'].values[0]}\nDeaths: {entry['Deaths'].values[0]}\nActive: {entry['Active'].values[0]}"
+        await ctx.send(m)
+
 # Runs the bot
 client.run('ODM2NTc4MTI4MzA1NzE3Mjc5.YIgCGA.4ac__Fyd0T_F-0tmx--DStdQaMY')
