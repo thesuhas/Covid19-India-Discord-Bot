@@ -11,8 +11,12 @@ client.remove_command('help')
 # Saving file name
 filename = 'states.csv'
 
+# Initialising df to something
+df = 0
+
 @client.event
 async def on_ready():
+    global df
     # Create basic data frame and store
     test = requests.get('https://api.covid19india.org/csv/latest/state_wise.csv')
     test = str(test.text)
