@@ -38,24 +38,40 @@ async def on_ready():
     df["State"] = df["State"].str.lower()
     df.to_csv(filename)
 
-@client.command()
-async def help(ctx):
-    embed = discord.Embed(color = discord.Color.green())
-    commands = "`.states` to get a list of states\n`.state {state}` to get cases in that particular state\n`.india` to get nationwide cases"
-    embed.add_field(name = 'Commands', value = commands, inline = False)
-    await ctx.send(embed = embed)
+@client.event
+async def on_message(ctx):
+    if client.user.mentioned_in(ctx):
+        await ctx.channel.send(f"{ctx.author.mention} don't ping the bot da lawda")
+    else:
+        await client.process_commands(ctx)
 
 @client.command()
-async def state(ctx, *, state):
-    if (state.lower() == "total"):
-        await ctx.send("Use `.india` for total cases")
+async def help(ctx, text = ''):
+    if text == '':
+        embed = discord.Embed(color = discord.Color.green())
+        commands = "`.states` to get a list of states\n`.state {state}` to get cases in that particular state\n`.india` to get nationwide cases"
+        embed.add_field(name = 'Commands', value = commands, inline = False)
+        await ctx.send(embed = embed)
     else:
-        entry = df.loc[df['State'] == state.lower()]
-        if entry.empty:
-            await ctx.send("Chosen state not available")
+        embed = discord.Embed(title = 'help', color = discord.Color.green(), description = '`.help` does not take any arguments.\n**Syntax:** `.help`')
+        await ctx.send(embed = embed)
+
+@client.command()
+async def state(ctx, *, state = ''):
+    if state == '':
+        # If state has not been mentioned
+        embed = discord.Embed(title = "State", color = discord.Color.green(), description = 'Need to mention a state.\n**Syntax:** `.state {state}`\n Run `.help` for more info')
+        await ctx.send(embed = embed)
+    else:
+        if (state.lower() == "total"):
+            await ctx.send("Use `.india` for total cases")
         else:
-            m = f"**Covid Cases in {state[0].upper() + state[1:]}:**\nConfirmed: {entry['Confirmed'].values[0]}\nRecovered: {entry['Recovered'].values[0]}\nDeaths: {entry['Deaths'].values[0]}\nActive: {entry['Active'].values[0]}"
-            await ctx.send(m)
+            entry = df.loc[df['State'] == state.lower()]
+            if entry.empty:
+                await ctx.send("Chosen state not available")
+            else:
+                m = f"**Covid Cases in {state[0].upper() + state[1:]}:**\nConfirmed: {entry['Confirmed'].values[0]}\nRecovered: {entry['Recovered'].values[0]}\nDeaths: {entry['Deaths'].values[0]}\nActive: {entry['Active'].values[0]}"
+                await ctx.send(m)
 
 @client.command()
 async def india(ctx):
