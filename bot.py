@@ -38,6 +38,10 @@ async def on_ready():
     df["State"] = df["State"].str.lower()
     df.to_csv(filename)
 
+@client.event
+async def on_command_error(ctx):
+    await ctx.send("Incorrect use of command, use `.help` for more info")
+
 @client.command()
 async def help(ctx):
     embed = discord.Embed(color = discord.Color.green())
