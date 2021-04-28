@@ -68,13 +68,16 @@ async def india(ctx):
     await ctx.send(m)
 
 @client.command()
-async def states(ctx):
+async def states(ctx, text = ''):
     global s
-    # Returns list of states
-    string = '**States and Union Territories:\n**'
-    for i in s:
-        string += i + '\n'
-    await ctx.send(string)
+    if text != '':
+        await ctx.send('Wrong usage of command, check `.help`')
+    else:
+        # Returns list of states
+        string = '**States and Union Territories:\n**'
+        for i in s:
+            string += i + '\n'
+        await ctx.send(string)
 
 # Updates dataframe every 30 mins
 @tasks.loop(seconds = 1800)
