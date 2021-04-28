@@ -26,23 +26,25 @@ async def on_ready():
 
     data = io.StringIO(test)
     df = pd.read_csv(data, sep=",")
+    # Making column lower case
+    df["State"] = df["State"].str.lower()
     df.to_csv(filename)
 
 @client.command()
 async def state(ctx, *, state):
-    if (state == "Total"):
+    if (state.lower() == "total"):
         await ctx.send("Use `.india` for total cases")
     else:
-        entry = df.loc[df['State'] == state]
+        entry = df.loc[df['State'] == state.lower()]
         if entry.empty:
             await ctx.send("Chosen state not available")
         else:
-            m = f"**Covid Cases in {state}:**\nConfirmed: {entry['Confirmed'].values[0]}\nRecovered: {entry['Recovered'].values[0]}\nDeaths: {entry['Deaths'].values[0]}\nActive: {entry['Active'].values[0]}"
+            m = f"**Covid Cases in {state[0].upper() + state[1:]}:**\nConfirmed: {entry['Confirmed'].values[0]}\nRecovered: {entry['Recovered'].values[0]}\nDeaths: {entry['Deaths'].values[0]}\nActive: {entry['Active'].values[0]}"
             await ctx.send(m)
 
 @client.command()
 async def india(ctx):
-    entry = df.loc[df['State'] == 'Total']
+    entry = df.loc[df['State'] == 'total']
     m = f"**Covid Cases in the country:**\nConfirmed: {entry['Confirmed'].values[0]}\nRecovered: {entry['Recovered'].values[0]}\nDeaths: {entry['Deaths'].values[0]}\nActive: {entry['Active'].values[0]}"
     await ctx.send(m)
 
@@ -56,6 +58,8 @@ async def update():
 
     data = io.StringIO(test)
     df = pd.read_csv(data, sep=",")
+    # Making states lowercase
+    df["State"] = df["State"].str.lower()
     df.to_csv(filename)
     # Prints when df is last updated
     print("df Updated at: ", datetime.datetime.now())
