@@ -15,9 +15,13 @@ filename = 'states.csv'
 # Initialising df to something
 df = 0
 
+# Initialising states list
+s = list()
+
 @client.event
 async def on_ready():
     global df
+    global s
     # Start updation loop
     update.start()
     # Create basic data frame and store
@@ -26,6 +30,10 @@ async def on_ready():
 
     data = io.StringIO(test)
     df = pd.read_csv(data, sep=",")
+    # Create states list
+    s = [df.iloc[i]['State'] for i in range(len(df))]
+    # Removing Total and State Unassigned
+    s = s[1:len(s) - 1]
     # Making column lower case
     df["State"] = df["State"].str.lower()
     df.to_csv(filename)
@@ -47,6 +55,15 @@ async def india(ctx):
     entry = df.loc[df['State'] == 'total']
     m = f"**Covid Cases in the country:**\nConfirmed: {entry['Confirmed'].values[0]}\nRecovered: {entry['Recovered'].values[0]}\nDeaths: {entry['Deaths'].values[0]}\nActive: {entry['Active'].values[0]}"
     await ctx.send(m)
+
+@client.command()
+async def states(ctx):
+    global s
+    # Returns list of states
+    string = '**States and Union Territories:\n**'
+    for i in s:
+        string += i + '\n'
+    await ctx.send(string)
 
 # Updates dataframe every 30 mins
 @tasks.loop(seconds = 1800)
