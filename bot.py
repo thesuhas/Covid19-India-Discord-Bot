@@ -3,6 +3,7 @@ import pandas as pd
 import io
 import discord
 import datetime
+from babel.numbers import format_currency
 from discord.ext import commands, tasks
 
 # Create a bot instance and sets a command prefix
@@ -72,10 +73,10 @@ async def state(ctx, *, state = ''):
             else:
                 #m = f"**Covid Cases in {state[0].upper() + state[1:]}:**\nConfirmed: {entry['Confirmed'].values[0]}\nRecovered: {entry['Recovered'].values[0]}\nDeaths: {entry['Deaths'].values[0]}\nActive: {entry['Active'].values[0]}"
                 embed = discord.Embed(title = f"Cases in {state[0].upper() + state[1:]}", color = discord.Color.green())
-                embed.add_field(name = 'Active', value = entry['Active'].values[0], inline = True)
-                embed.add_field(name = 'Confirmed', value = entry['Confirmed'].values[0], inline = True)
-                embed.add_field(name = 'Recovered', value = entry['Recovered'].values[0], inline = True)
-                embed.add_field(name = 'Deaths', value = entry['Deaths'].values[0], inline = False)
+                embed.add_field(name = 'Active', value = format_currency(int(entry['Active'].values[0]), 'INR', locale ='en_IN')[1:-3], inline = True)
+                embed.add_field(name = 'Confirmed', value = format_currency(int(entry['Confirmed'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = True)
+                embed.add_field(name = 'Recovered', value = format_currency(int(entry['Recovered'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = True)
+                embed.add_field(name = 'Deaths', value = format_currency(int(entry['Deaths'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = False)
                 await ctx.send(embed = embed)
 
 @client.command()
@@ -83,10 +84,10 @@ async def india(ctx):
     entry = df.loc[df['State'] == 'total']
     #m = f"**Covid Cases in the country:**\nConfirmed: {entry['Confirmed'].values[0]}\nRecovered: {entry['Recovered'].values[0]}\nDeaths: {entry['Deaths'].values[0]}\nActive: {entry['Active'].values[0]}"
     embed = discord.Embed(title = "Cases in the Country", color = discord.Color.green())
-    embed.add_field(name = 'Active', value = entry['Active'].values[0], inline = True)
-    embed.add_field(name = 'Confirmed', value = entry['Confirmed'].values[0], inline = True)
-    embed.add_field(name = 'Recovered', value = entry['Recovered'].values[0], inline = True)
-    embed.add_field(name = 'Deaths', value = entry['Deaths'].values[0], inline = False)
+    embed.add_field(name = 'Active', value = format_currency(int(entry['Active'].values[0]), 'INR', locale ='en_IN')[1:-3], inline = True)
+    embed.add_field(name = 'Confirmed', value = format_currency(int(entry['Confirmed'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = True)
+    embed.add_field(name = 'Recovered', value = format_currency(int(entry['Recovered'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = True)
+    embed.add_field(name = 'Deaths', value = format_currency(int(entry['Deaths'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = False)
     await ctx.send(embed = embed)
 
 @client.command()
