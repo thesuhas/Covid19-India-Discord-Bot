@@ -2,6 +2,7 @@ import requests
 import pandas as pd
 import io
 import discord
+import datetime
 from discord.ext import commands, tasks
 
 # Create a bot instance and sets a command prefix
@@ -17,6 +18,8 @@ df = 0
 @client.event
 async def on_ready():
     global df
+    # Start updation loop
+    update.start()
     # Create basic data frame and store
     test = requests.get('https://api.covid19india.org/csv/latest/state_wise.csv')
     test = str(test.text)
@@ -43,7 +46,8 @@ async def india(ctx):
     m = f"**Covid Cases in the country:**\nConfirmed: {entry['Confirmed'].values[0]}\nRecovered: {entry['Recovered'].values[0]}\nDeaths: {entry['Deaths'].values[0]}\nActive: {entry['Active'].values[0]}"
     await ctx.send(m)
 
-@tasks.loop(seconds = 2)
+# Updates dataframe every 30 mins
+@tasks.loop(seconds = 1800)
 async def update():
     global df
     # Create basic data frame and store
@@ -53,7 +57,8 @@ async def update():
     data = io.StringIO(test)
     df = pd.read_csv(data, sep=",")
     df.to_csv(filename)
-    print("df Updated")
+    # Prints when df is last updated
+    print("df Updated at: ", datetime.datetime.now())
 
 # Runs the bot
 client.run('ODM2NTc4MTI4MzA1NzE3Mjc5.YIgCGA.4ac__Fyd0T_F-0tmx--DStdQaMY')
