@@ -39,6 +39,13 @@ async def on_ready():
     df.to_csv(filename)
 
 @client.command()
+async def help(ctx):
+    embed = discord.Embed(color = discord.Color.green())
+    commands = "`.states` to get a list of states\n`.state {state}` to get cases in that particular state\n`.india` to get nationwide cases"
+    embed.add_field(name = 'Commands', value = commands, inline = False)
+    await ctx.send(embed = embed)
+
+@client.command()
 async def state(ctx, *, state):
     if (state.lower() == "total"):
         await ctx.send("Use `.india` for total cases")
