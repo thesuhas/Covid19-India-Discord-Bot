@@ -79,8 +79,33 @@ async def help_slash(ctx):
     help_embed.add_field(name = 'Commands', value = commands, inline = False)
     await ctx.send(embeds = [help_embed])
 
-@client.command()
-async def state(ctx, *, state = ''):
+@client.command(aliases = ['state'])
+async def state_command(ctx, *, state = ''):
+    if state == '':
+        # If state has not been mentioned
+        embed = discord.Embed(title = "State", color = discord.Color.green(), description = 'Need to mention a state.\n**Syntax:** `.state {state}`\n Run `.help` for more info')
+        await ctx.send(embed = embed)
+    else:
+        if (state.lower() == "total"):
+            await ctx.send("Use `.india` for total cases")
+        else:
+            entry = df.loc[df['State'] == state.lower()]
+            if entry.empty:
+                await ctx.send("Chosen state not available")
+            else:
+                #m = f"**Covid Cases in {state[0].upper() + state[1:]}:**\nConfirmed: {entry['Confirmed'].values[0]}\nRecovered: {entry['Recovered'].values[0]}\nDeaths: {entry['Deaths'].values[0]}\nActive: {entry['Active'].values[0]}"
+                embed = discord.Embed(title = f"Cases in {state[0].upper() + state[1:]}", color = discord.Color.green())
+                embed.add_field(name = 'Active', value = format_currency(int(entry['Active'].values[0]), 'INR', locale ='en_IN')[1:-3], inline = True)
+                embed.add_field(name = 'Confirmed', value = format_currency(int(entry['Confirmed'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = True)
+                embed.add_field(name = 'Recovered', value = format_currency(int(entry['Recovered'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = True)
+                embed.add_field(name = 'Deaths', value = format_currency(int(entry['Deaths'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = False)
+                await ctx.send(embed = embed)
+
+# Slash command of state
+@slash.slash(name='state', description = 'State-wise stats of COVID-19')
+async def state_slash(ctx, *, state = ''):
+    # .defer lets bot think for upto 15 seconds
+    await ctx.defer()
     if state == '':
         # If state has not been mentioned
         embed = discord.Embed(title = "State", color = discord.Color.green(), description = 'Need to mention a state.\n**Syntax:** `.state {state}`\n Run `.help` for more info')
