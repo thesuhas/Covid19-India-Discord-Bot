@@ -7,7 +7,7 @@ from babel.numbers import format_currency
 from discord.ext import commands, tasks
 
 # Create a bot instance and sets a command prefix
-client = commands.Bot(command_prefix = '.')
+client = commands.Bot(command_prefix = '.', intents = discord.Intents.all())
 client.remove_command('help')
 
 # Saving file name
