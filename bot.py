@@ -5,10 +5,15 @@ import discord
 import datetime
 from babel.numbers import format_currency
 from discord.ext import commands, tasks
+from dotenv import load_dotenv
+import os
 
 # Create a bot instance and sets a command prefix
 client = commands.Bot(command_prefix = '.')
 client.remove_command('help')
+
+#load the env variable token
+load_dotenv()
 
 # Saving file name
 filename = 'states.csv'
@@ -119,4 +124,4 @@ async def update():
     print("df Updated at: ", datetime.datetime.now())
 
 # Runs the bot
-client.run('ODM2NTc4MTI4MzA1NzE3Mjc5.YIgCGA.4ac__Fyd0T_F-0tmx--DStdQaMY')
+client.run(os.getenv('TOKEN'))

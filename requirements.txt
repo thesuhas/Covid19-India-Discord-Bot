@@ -1,0 +1,7 @@
+discord==1.0.1
+discord.py==1.7.1
+discord-py-slash-command==1.1.2
+pandas==1.2.4
+requests==2.25.1
+Babel==2.9.1
+python-dotenv==0.17.0
