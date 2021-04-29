@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 import os
 
 # Create a bot instance and sets a command prefix
-client = commands.Bot(command_prefix = '.')
+client = commands.Bot(command_prefix = '.', intents = discord.Intents.all())
 client.remove_command('help')
 
 #load the env variable token
