@@ -7,6 +7,7 @@ from babel.numbers import format_currency
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
 import os
+from discord_slash import SlashCommand
 
 # Create a bot instance and sets a command prefix
 client = commands.Bot(command_prefix = '.', intents = discord.Intents.all())
@@ -23,6 +24,9 @@ df = 0
 
 # Initialising states list
 s = list()
+
+#Initialising slash command
+slash = SlashCommand(client, sync_commands=True)
 
 @client.event
 async def on_ready():
@@ -44,15 +48,19 @@ async def on_ready():
     df["State"] = df["State"].str.lower()
     df.to_csv(filename)
 
+    await client.get_channel(810508395546542120).send(f"Bot is online")
+
 @client.event
 async def on_message(ctx):
-    if client.user.mentioned_in(ctx):
+    if ctx.author.bot:
+        pass
+    elif client.user.mentioned_in(ctx):
         await ctx.channel.send(f"{ctx.author.mention} don't ping the bot da lawda")
     else:
         await client.process_commands(ctx)
 
-@client.command()
-async def help(ctx, text = ''):
+@client.command(aliases = ['h', 'help'])
+async def help_command(ctx, text = ''):
     if text == '':
         embed = discord.Embed(color = discord.Color.green())
         commands = "`.states` to get a list of states\n`.state {state}` to get cases in that particular state\n`.india` to get nationwide cases"
@@ -61,6 +69,15 @@ async def help(ctx, text = ''):
     else:
         embed = discord.Embed(title = 'help', color = discord.Color.green(), description = '`.help` does not take any arguments.\n**Syntax:** `.help`')
         await ctx.send(embed = embed)
+
+# Slash Command of the same
+@slash.slash(name="help", description="Commands available from me")
+async def help_slash(ctx):
+    await ctx.defer()
+    help_embed = discord.Embed(color = discord.Color.green())
+    commands = "`.states` to get a list of states\n`.state {state}` to get cases in that particular state\n`.india` to get nationwide cases"
+    help_embed.add_field(name = 'Commands', value = commands, inline = False)
+    await ctx.send(embeds = [help_embed])
 
 @client.command()
 async def state(ctx, *, state = ''):
@@ -84,8 +101,8 @@ async def state(ctx, *, state = ''):
                 embed.add_field(name = 'Deaths', value = format_currency(int(entry['Deaths'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = False)
                 await ctx.send(embed = embed)
 
-@client.command()
-async def india(ctx):
+@client.command(aliases = ['india'])
+async def india_command(ctx):
     entry = df.loc[df['State'] == 'total']
     #m = f"**Covid Cases in the country:**\nConfirmed: {entry['Confirmed'].values[0]}\nRecovered: {entry['Recovered'].values[0]}\nDeaths: {entry['Deaths'].values[0]}\nActive: {entry['Active'].values[0]}"
     embed = discord.Embed(title = "Cases in the Country", color = discord.Color.green())
@@ -94,6 +111,19 @@ async def india(ctx):
     embed.add_field(name = 'Recovered', value = format_currency(int(entry['Recovered'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = True)
     embed.add_field(name = 'Deaths', value = format_currency(int(entry['Deaths'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = False)
     await ctx.send(embed = embed)
+
+# Slash command of the above
+@slash.slash(name='india', description='Stats of COVID-19 in India')
+async def india_slash(ctx):
+    await ctx.defer()
+    entry = df.loc[df['State'] == 'total']
+    #m = f"**Covid Cases in the country:**\nConfirmed: {entry['Confirmed'].values[0]}\nRecovered: {entry['Recovered'].values[0]}\nDeaths: {entry['Deaths'].values[0]}\nActive: {entry['Active'].values[0]}"
+    embed = discord.Embed(title = "Cases in the Country", color = discord.Color.green())
+    embed.add_field(name = 'Active', value = format_currency(int(entry['Active'].values[0]), 'INR', locale ='en_IN')[1:-3], inline = True)
+    embed.add_field(name = 'Confirmed', value = format_currency(int(entry['Confirmed'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = True)
+    embed.add_field(name = 'Recovered', value = format_currency(int(entry['Recovered'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = True)
+    embed.add_field(name = 'Deaths', value = format_currency(int(entry['Deaths'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = False)
+    await ctx.send(embeds = [embed])
 
 @client.command()
 async def states(ctx, text = ''):
