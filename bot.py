@@ -8,6 +8,7 @@ from discord.ext import commands, tasks
 from dotenv import load_dotenv
 import os
 from discord_slash import SlashCommand
+import datetime
 
 # Create a bot instance and sets a command prefix
 client = commands.Bot(command_prefix = '.', intents = discord.Intents.all())
@@ -18,9 +19,14 @@ load_dotenv()
 
 # Saving file name
 filename = 'states.csv'
+file_daily = "states_yesterday.csv"
+
+# Mapping for queries to states_yesterday
+mapp = {"total": 'TT','andaman and nicobar islands': 'AN',"andhra pradesh": 'AP',"arunachal pradesh": 'AR',"assam": 'AS', "bihar": 'BR',"chandigarh": 'CH',"chhattisgarh": 'CT',"dadra and nagar haveli and daman and diu": 'DN',"dadra and nagar haveli and daman and diu": 'DD',"delhi": 'DL',"goa": 'GA',"gujarat": 'GJ',"haryana": 'HR',"himachal pradesh": 'HP',"jammu and kashmir": 'JK',"jharkhand": 'JH',"karnataka": 'KA',"kerala": 'KL', "ladakh": 'LA',"lakshadweep": 'LD',"madhya pradesh": 'MP',"maharashtra": 'MH',"manipur": 'MN',"meghalaya": 'ML',"mizoram": 'MZ',"nagaland": 'NL',"odisha": 'OR',"puducherry": 'PY',"punjab": 'PB',"rajasthan": 'RJ',"sikkim": 'SK',"tamil nadu": 'TN',"telangana": 'TG',"tripura": 'TR',"uttar pradesh": 'UP',"uttarakhand": 'UT',"west bengal": 'WB',"state unassigned": 'UN'}
 
 # Initialising df to something
 df = 0
+df_daily = 0
 
 # Initialising states list
 s = list()
@@ -31,9 +37,11 @@ slash = SlashCommand(client, sync_commands=True)
 @client.event
 async def on_ready():
     global df
+    global df_daily
     global s
     # Start updation loop
     update.start()
+    update_daily.start()
     # Create basic data frame and store
     test = requests.get('https://api.covid19india.org/csv/latest/state_wise.csv')
     test = str(test.text)
@@ -47,6 +55,17 @@ async def on_ready():
     # Making column lower case
     df["State"] = df["State"].str.lower()
     df.to_csv(filename)
+
+    # Creating daily df
+    response = requests.get('https://api.covid19india.org/csv/latest/state_wise_daily.csv')
+    response = str(response.text)
+    data_daily = io.StringIO(response)
+    df1 = pd.read_csv(data_daily, sep = ",")
+    # Get yestedays date in appropriate formatting
+    t = datetime.datetime.now() - datetime.timedelta(days = 1)
+    t = t.strftime("%d-%b-%y")
+    df_daily = df1[df1['Date'] == t]
+    df_daily.to_csv(file_daily)
 
     await client.get_channel(810508395546542120).send(f"Bot is online")
 
@@ -96,9 +115,9 @@ async def state_command(ctx, *, state = ''):
                 #m = f"**Covid Cases in {state[0].upper() + state[1:]}:**\nConfirmed: {entry['Confirmed'].values[0]}\nRecovered: {entry['Recovered'].values[0]}\nDeaths: {entry['Deaths'].values[0]}\nActive: {entry['Active'].values[0]}"
                 embed = discord.Embed(title = f"Cases in {state[0].upper() + state[1:]}", color = discord.Color.green())
                 embed.add_field(name = 'Active', value = format_currency(int(entry['Active'].values[0]), 'INR', locale ='en_IN')[1:-3], inline = True)
-                embed.add_field(name = 'Confirmed', value = format_currency(int(entry['Confirmed'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = True)
-                embed.add_field(name = 'Recovered', value = format_currency(int(entry['Recovered'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = True)
-                embed.add_field(name = 'Deaths', value = format_currency(int(entry['Deaths'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = False)
+                embed.add_field(name = 'Confirmed', value = format_currency(int(entry['Confirmed'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Confirmed'][mapp[state]]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = True)
+                embed.add_field(name = 'Recovered', value = format_currency(int(entry['Recovered'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Recovered'][mapp[state]]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = True)
+                embed.add_field(name = 'Deaths', value = format_currency(int(entry['Deaths'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Deceased'][mapp[state]]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = False)
                 await ctx.send(embed = embed)
 
 # Slash command of state
@@ -121,9 +140,9 @@ async def state_slash(ctx, *, state = ''):
                 #m = f"**Covid Cases in {state[0].upper() + state[1:]}:**\nConfirmed: {entry['Confirmed'].values[0]}\nRecovered: {entry['Recovered'].values[0]}\nDeaths: {entry['Deaths'].values[0]}\nActive: {entry['Active'].values[0]}"
                 embed = discord.Embed(title = f"Cases in {state[0].upper() + state[1:]}", color = discord.Color.green())
                 embed.add_field(name = 'Active', value = format_currency(int(entry['Active'].values[0]), 'INR', locale ='en_IN')[1:-3], inline = True)
-                embed.add_field(name = 'Confirmed', value = format_currency(int(entry['Confirmed'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = True)
-                embed.add_field(name = 'Recovered', value = format_currency(int(entry['Recovered'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = True)
-                embed.add_field(name = 'Deaths', value = format_currency(int(entry['Deaths'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = False)
+                embed.add_field(name = 'Confirmed', value = format_currency(int(entry['Confirmed'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Confirmed'][mapp[state]]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = True)
+                embed.add_field(name = 'Recovered', value = format_currency(int(entry['Recovered'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Recovered'][mapp[state]]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = True)
+                embed.add_field(name = 'Deaths', value = format_currency(int(entry['Deaths'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Deceased'][mapp[state]]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = False)
                 await ctx.send(embed = embed)
 
 @client.command(aliases = ['india'])
@@ -132,9 +151,9 @@ async def india_command(ctx):
     #m = f"**Covid Cases in the country:**\nConfirmed: {entry['Confirmed'].values[0]}\nRecovered: {entry['Recovered'].values[0]}\nDeaths: {entry['Deaths'].values[0]}\nActive: {entry['Active'].values[0]}"
     embed = discord.Embed(title = "Cases in the Country", color = discord.Color.green())
     embed.add_field(name = 'Active', value = format_currency(int(entry['Active'].values[0]), 'INR', locale ='en_IN')[1:-3], inline = True)
-    embed.add_field(name = 'Confirmed', value = format_currency(int(entry['Confirmed'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = True)
-    embed.add_field(name = 'Recovered', value = format_currency(int(entry['Recovered'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = True)
-    embed.add_field(name = 'Deaths', value = format_currency(int(entry['Deaths'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = False)
+    embed.add_field(name = 'Confirmed', value = format_currency(int(entry['Confirmed'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Confirmed'][mapp['total']]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = True)
+    embed.add_field(name = 'Recovered', value = format_currency(int(entry['Recovered'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Recovered'][mapp['total']]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = True)
+    embed.add_field(name = 'Deaths', value = format_currency(int(entry['Deaths'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Deceased'][mapp['total']]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = False)
     await ctx.send(embed = embed)
 
 # Slash command of the above
@@ -145,9 +164,9 @@ async def india_slash(ctx):
     #m = f"**Covid Cases in the country:**\nConfirmed: {entry['Confirmed'].values[0]}\nRecovered: {entry['Recovered'].values[0]}\nDeaths: {entry['Deaths'].values[0]}\nActive: {entry['Active'].values[0]}"
     embed = discord.Embed(title = "Cases in the Country", color = discord.Color.green())
     embed.add_field(name = 'Active', value = format_currency(int(entry['Active'].values[0]), 'INR', locale ='en_IN')[1:-3], inline = True)
-    embed.add_field(name = 'Confirmed', value = format_currency(int(entry['Confirmed'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = True)
-    embed.add_field(name = 'Recovered', value = format_currency(int(entry['Recovered'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = True)
-    embed.add_field(name = 'Deaths', value = format_currency(int(entry['Deaths'].values[0]), 'INR', locale = 'en_IN')[1:-3], inline = False)
+    embed.add_field(name = 'Confirmed', value = format_currency(int(entry['Confirmed'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Confirmed'][mapp['total']]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = True)
+    embed.add_field(name = 'Recovered', value = format_currency(int(entry['Recovered'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Recovered'][mapp['total']]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = True)
+    embed.add_field(name = 'Deaths', value = format_currency(int(entry['Deaths'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Deceased'][mapp['total']]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = False)
     await ctx.send(embeds = [embed])
 
 @client.command()
@@ -161,6 +180,22 @@ async def states(ctx, text = ''):
         for i in s:
             string += i + '\n'
         await ctx.send(string)
+
+@tasks.loop(seconds = 86400)
+async def update_daily():
+    global df_daily
+    # Creating daily df
+    response = requests.get('https://api.covid19india.org/csv/latest/state_wise_daily.csv')
+    response = str(response.text)
+    data_daily = io.StringIO(response)
+    df1 = pd.read_csv(data_daily, sep = ",")
+    # Get yestedays date in appropriate formatting
+    t = datetime.datetime.now() - datetime.timedelta(days = 1)
+    t = t.strftime("%d-%b-%y")
+    df_daily = df1[df1['Date'] == t]
+    df_daily.to_csv(file_daily)
+    print("df_daily Updated at: ", datetime.datetime.now())
+
 
 # Updates dataframe every 30 mins
 @tasks.loop(seconds = 1800)
