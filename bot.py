@@ -78,6 +78,36 @@ async def on_message(ctx):
     else:
         await client.process_commands(ctx)
 
+
+@client.command(aliases=['contribute', 'support'])
+async def _support(ctx, *params):
+    Embeds = discord.Embed(title="Contributions", color=0x00ff00)
+    Embeds.add_field(
+        name="Github repo", value="https://github.com/thesuhas/Covid19-India-Discord-Bot/", inline=False)
+    Embeds.add_field(
+        name='\u200b', value="If you wish to contribute to the bot, run these steps:", inline=False)
+    rules = {
+        1: "Fork this repository",
+        2: "Create a new branch called `beta-username`",
+        3: "Do whatever changes you wish to do and create a pull request with the following information furnished in the request message: `The functionality you wish to change/add | What did you change/add`",
+        4: "Send a review request to any of the following members: `thesuhas`, `RIT3shSapata`, `sach-12` and/or `ArvindAROO`.",
+        5: "Wait for approval for reviewers. Your PR may be directly accepted or requested for further changes."
+    }
+    for ruleNo in rules:
+        Embeds.add_field(name='\u200b', value="`" +
+                            str(ruleNo) + '`: ' + rules[ruleNo], inline=False)
+
+    stark = ctx.guild.get_member(718845827413442692).mention
+    sapota = ctx.guild.get_member(404597472103759872).mention
+    suhas = ctx.guild.get_member(554876169363652620).mention
+    sach = ctx.guild.get_member(723377619420184668).mention
+    Embeds.add_field(name="Reviewers", value="`thesuhas` - {}\n`ArvindAROO` - {}\n `RIT3shSapata` - {} and\n `sach-12` - {}".format(
+         suhas,stark, sapota, sach), inline=False)
+    Embeds.add_field(
+        name="Important", value="**Under no circumstances is anyone allowed to merge to the main branch.**", inline=False)
+    await ctx.send(embed=Embeds)
+
+
 @client.command(aliases = ['h', 'help'])
 async def help_command(ctx, text = ''):
     if text == '':
