@@ -1,2 +1,3 @@
 .env
-.pem
+*.pem
+web_scrape.py
