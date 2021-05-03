@@ -144,9 +144,9 @@ async def state_command(ctx, *, state = ''):
             else:
                 #m = f"**Covid Cases in {state[0].upper() + state[1:]}:**\nConfirmed: {entry['Confirmed'].values[0]}\nRecovered: {entry['Recovered'].values[0]}\nDeaths: {entry['Deaths'].values[0]}\nActive: {entry['Active'].values[0]}"
                 embed = discord.Embed(title = f"Cases in {state[0].upper() + state[1:]}", color = discord.Color.green())
-                embed.add_field(name = 'Active', value = format_currency(int(entry['Active'].values[0]), 'INR', locale ='en_IN')[1:-3], inline = True)
-                embed.add_field(name = 'Confirmed', value = format_currency(int(entry['Confirmed'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Confirmed'][mapp[state]]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = True)
-                embed.add_field(name = 'Recovered', value = format_currency(int(entry['Recovered'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Recovered'][mapp[state]]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = True)
+                embed.add_field(name = 'Active', value = format_currency(int(entry['Active'].values[0]), 'INR', locale ='en_IN')[1:-3], inline = False)
+                embed.add_field(name = 'Confirmed', value = format_currency(int(entry['Confirmed'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Confirmed'][mapp[state]]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = False)
+                embed.add_field(name = 'Recovered', value = format_currency(int(entry['Recovered'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Recovered'][mapp[state]]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = False)
                 embed.add_field(name = 'Deaths', value = format_currency(int(entry['Deaths'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Deceased'][mapp[state]]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = False)
                 await ctx.send(embed = embed)
 
@@ -169,9 +169,9 @@ async def state_slash(ctx, *, state = ''):
             else:
                 #m = f"**Covid Cases in {state[0].upper() + state[1:]}:**\nConfirmed: {entry['Confirmed'].values[0]}\nRecovered: {entry['Recovered'].values[0]}\nDeaths: {entry['Deaths'].values[0]}\nActive: {entry['Active'].values[0]}"
                 embed = discord.Embed(title = f"Cases in {state[0].upper() + state[1:]}", color = discord.Color.green())
-                embed.add_field(name = 'Active', value = format_currency(int(entry['Active'].values[0]), 'INR', locale ='en_IN')[1:-3], inline = True)
-                embed.add_field(name = 'Confirmed', value = format_currency(int(entry['Confirmed'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Confirmed'][mapp[state]]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = True)
-                embed.add_field(name = 'Recovered', value = format_currency(int(entry['Recovered'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Recovered'][mapp[state]]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = True)
+                embed.add_field(name = 'Active', value = format_currency(int(entry['Active'].values[0]), 'INR', locale ='en_IN')[1:-3], inline = False)
+                embed.add_field(name = 'Confirmed', value = format_currency(int(entry['Confirmed'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Confirmed'][mapp[state]]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = False)
+                embed.add_field(name = 'Recovered', value = format_currency(int(entry['Recovered'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Recovered'][mapp[state]]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = False)
                 embed.add_field(name = 'Deaths', value = format_currency(int(entry['Deaths'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Deceased'][mapp[state]]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = False)
                 await ctx.send(embed = embed)
 
@@ -180,9 +180,9 @@ async def india_command(ctx):
     entry = df.loc[df['State'] == 'total']
     #m = f"**Covid Cases in the country:**\nConfirmed: {entry['Confirmed'].values[0]}\nRecovered: {entry['Recovered'].values[0]}\nDeaths: {entry['Deaths'].values[0]}\nActive: {entry['Active'].values[0]}"
     embed = discord.Embed(title = "Cases in the Country", color = discord.Color.green())
-    embed.add_field(name = 'Active', value = format_currency(int(entry['Active'].values[0]), 'INR', locale ='en_IN')[1:-3], inline = True)
-    embed.add_field(name = 'Confirmed', value = format_currency(int(entry['Confirmed'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Confirmed'][mapp['total']]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = True)
-    embed.add_field(name = 'Recovered', value = format_currency(int(entry['Recovered'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Recovered'][mapp['total']]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = True)
+    embed.add_field(name = 'Active', value = format_currency(int(entry['Active'].values[0]), 'INR', locale ='en_IN')[1:-3], inline = False)
+    embed.add_field(name = 'Confirmed', value = format_currency(int(entry['Confirmed'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Confirmed'][mapp['total']]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = False)
+    embed.add_field(name = 'Recovered', value = format_currency(int(entry['Recovered'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Recovered'][mapp['total']]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = False)
     embed.add_field(name = 'Deaths', value = format_currency(int(entry['Deaths'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Deceased'][mapp['total']]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = False)
     await ctx.send(embed = embed)
 
@@ -191,11 +191,10 @@ async def india_command(ctx):
 async def india_slash(ctx):
     await ctx.defer()
     entry = df.loc[df['State'] == 'total']
-    #m = f"**Covid Cases in the country:**\nConfirmed: {entry['Confirmed'].values[0]}\nRecovered: {entry['Recovered'].values[0]}\nDeaths: {entry['Deaths'].values[0]}\nActive: {entry['Active'].values[0]}"
     embed = discord.Embed(title = "Cases in the Country", color = discord.Color.green())
-    embed.add_field(name = 'Active', value = format_currency(int(entry['Active'].values[0]), 'INR', locale ='en_IN')[1:-3], inline = True)
-    embed.add_field(name = 'Confirmed', value = format_currency(int(entry['Confirmed'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Confirmed'][mapp['total']]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = True)
-    embed.add_field(name = 'Recovered', value = format_currency(int(entry['Recovered'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Recovered'][mapp['total']]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = True)
+    embed.add_field(name = 'Active', value = format_currency(int(entry['Active'].values[0]), 'INR', locale ='en_IN')[1:-3], inline = False)
+    embed.add_field(name = 'Confirmed', value = format_currency(int(entry['Confirmed'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Confirmed'][mapp['total']]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = False)
+    embed.add_field(name = 'Recovered', value = format_currency(int(entry['Recovered'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Recovered'][mapp['total']]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = False)
     embed.add_field(name = 'Deaths', value = format_currency(int(entry['Deaths'].values[0]), 'INR', locale = 'en_IN')[1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Deceased'][mapp['total']]), 'INR', locale = 'en_IN')[1:-3] + ')', inline = False)
     await ctx.send(embeds = [embed])
 
