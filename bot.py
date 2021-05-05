@@ -233,6 +233,9 @@ async def vaccine_command(ctx, pincode = "", date = datetime.datetime.now().strf
         if res.status_code == 400:
             await ctx.send("Invalid pincode")
             return
+        if res.status_code == 403:
+            await ctx.send("API is unresponsive at the time. Please try again after sometime")
+            return
         # Extracting json data
         data = res.json()
         sessions = dict()
@@ -276,6 +279,9 @@ async def vaccine_slash(ctx, pincode = "", date = datetime.datetime.now().strfti
         res = requests.get("https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin", headers = headers, params = data)
         if res.status_code == 400:
             await ctx.send("Invalid pincode")
+            return
+        if res.status_code == 403:
+            await ctx.send("API is unresponsive at the time. Please try again after sometime")
             return
         # Extracting json data
         data = res.json()
