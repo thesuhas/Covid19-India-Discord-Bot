@@ -219,42 +219,39 @@ async def vaccine_command(ctx, pincode = "", date = datetime.datetime.now().strf
         headers = {"Accept-Language": "en-IN"}
         data = {"pincode": pincode, "date": date}
         res = requests.get("https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin", headers = headers, params = data)
-        #if res.status_code == 400:
-         #   await ctx.send("Invalid pincode")
-          #  return
-        # Extracting json data
-        try:
-            data = res.json()
-            sessions = dict()
-            if len(data['centers']) > 0:
-                for i in data['centers']:
-                    #print(i)
-                    # Look at all sessions
-                    for j in i['sessions']:
-                        # If there is an available session
-                        if j['available_capacity'] > 0:
-                            # Check if hospital exists
-                            if i['name'] in sessions:
-                                sessions[i['name']].append(j)
-                            else:
-                                sessions[i['name']] = list()
-                                sessions[i['name']].append(j)
-                if len(sessions) == 0:
-                    await ctx.send("No available sessions")
-                else:
-                    # Create an embed for every session
-                    for sesh in sessions:
-                        embed = discord.Embed(title = f"Vaccine Available at {sesh}", color = discord.Color.green())
-                        embed.add_field(name = 'Date', value = date, inline = False)
-                        embed.add_field(name = 'Available Capacity', value = sessions[sesh][0]['available_capacity'], inline = False)
-                        embed.add_field(name = 'Minimum Age', value = sessions[sesh][0]['min_age_limit'], inline = False)
-                        embed.add_field(name = 'Vaccine', value = sessions[sesh][0]['vaccine'])
-                        embed.add_field(name = "Slots", value = '\n'.join(sessions[sesh][0]['slots']), inline = False)
-                        await ctx.send(embed=embed)
-            else:
-                await ctx.send("No available vaccination center")
-        except:
+        if res.status_code == 400:
             await ctx.send("Invalid pincode")
+            return
+        # Extracting json data
+        data = res.json()
+        sessions = dict()
+        if len(data['centers']) > 0:
+            for i in data['centers']:
+                #print(i)
+                # Look at all sessions
+                for j in i['sessions']:
+                    # If there is an available session
+                    if j['available_capacity'] > 0:
+                        # Check if hospital exists
+                        if i['name'] in sessions:
+                            sessions[i['name']].append(j)
+                        else:
+                            sessions[i['name']] = list()
+                            sessions[i['name']].append(j)
+            if len(sessions) == 0:
+                await ctx.send("No available sessions")
+            else:
+                # Create an embed for every session
+                for sesh in sessions:
+                    embed = discord.Embed(title = f"Vaccine Available at {sesh}", color = discord.Color.green())
+                    embed.add_field(name = 'Date', value = date, inline = False)
+                    embed.add_field(name = 'Available Capacity', value = sessions[sesh][0]['available_capacity'], inline = False)
+                    embed.add_field(name = 'Minimum Age', value = sessions[sesh][0]['min_age_limit'], inline = False)
+                    embed.add_field(name = 'Vaccine', value = sessions[sesh][0]['vaccine'])
+                    embed.add_field(name = "Slots", value = '\n'.join(sessions[sesh][0]['slots']), inline = False)
+                    await ctx.send(embed=embed)
+        else:
+            await ctx.send("No available vaccination center")
 
 @slash.slash(name = 'vaccine', description = 'List of Vaccination slotes near you')
 async def vaccine_slash(ctx, pincode = "", date = datetime.datetime.now().strftime("%d-%m-%Y")):
@@ -266,42 +263,40 @@ async def vaccine_slash(ctx, pincode = "", date = datetime.datetime.now().strfti
         headers = {"Accept-Language": "en-IN"}
         data = {"pincode": pincode, "date": date}
         res = requests.get("https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin", headers = headers, params = data)
-        #if res.status_code == 400:
-         #   await ctx.send("Invalid pincode")
-          #  return
-        # Extracting json data
-        try:
-            data = res.json()
-            sessions = dict()
-            if len(data['centers']) > 0:
-                for i in data['centers']:
-                    #print(i)
-                    # Look at all sessions
-                    for j in i['sessions']:
-                        # If there is an available session
-                        if j['available_capacity'] > 0:
-                            # Check if hospital exists
-                            if i['name'] in sessions:
-                                sessions[i['name']].append(j)
-                            else:
-                                sessions[i['name']] = list()
-                                sessions[i['name']].append(j)
-                if len(sessions) == 0:
-                    await ctx.send("No available sessions")
-                else:
-                    # Create an embed for every session
-                    for sesh in sessions:
-                        embed = discord.Embed(title = f"Vaccine Available at {sesh}", color = discord.Color.green())
-                        embed.add_field(name = 'Date', value = date, inline = False)
-                        embed.add_field(name = 'Available Capacity', value = sessions[sesh][0]['available_capacity'], inline = False)
-                        embed.add_field(name = 'Minimum Age', value = sessions[sesh][0]['min_age_limit'], inline = False)
-                        embed.add_field(name = 'Vaccine', value = sessions[sesh][0]['vaccine'])
-                        embed.add_field(name = "Slots", value = '\n'.join(sessions[sesh][0]['slots']), inline = False)
-                        await ctx.send(embed=embed)
-            else:
-                await ctx.send("No available vaccination center")
-        except:
+        print(res)
+        if res.status_code == 400:
             await ctx.send("Invalid pincode")
+            return
+        # Extracting json data
+        data = res.json()
+        sessions = dict()
+        if len(data['centers']) > 0:
+            for i in data['centers']:
+                #print(i)
+                # Look at all sessions
+                for j in i['sessions']:
+                    # If there is an available session
+                    if j['available_capacity'] > 0:
+                        # Check if hospital exists
+                        if i['name'] in sessions:
+                            sessions[i['name']].append(j)
+                        else:
+                            sessions[i['name']] = list()
+                            sessions[i['name']].append(j)
+            if len(sessions) == 0:
+                await ctx.send("No available sessions")
+            else:
+                # Create an embed for every session
+                for sesh in sessions:
+                    embed = discord.Embed(title = f"Vaccine Available at {sesh}", color = discord.Color.green())
+                    embed.add_field(name = 'Date', value = date, inline = False)
+                    embed.add_field(name = 'Available Capacity', value = sessions[sesh][0]['available_capacity'], inline = False)
+                    embed.add_field(name = 'Minimum Age', value = sessions[sesh][0]['min_age_limit'], inline = False)
+                    embed.add_field(name = 'Vaccine', value = sessions[sesh][0]['vaccine'])
+                    embed.add_field(name = "Slots", value = '\n'.join(sessions[sesh][0]['slots']), inline = False)
+                    await ctx.send(embed=embed)
+        else:
+            await ctx.send("No available vaccination center")
 
 
 
