@@ -70,6 +70,17 @@ async def on_ready():
     await client.get_channel(810508395546542120).send(f"Bot is online")
 
 @client.event
+async def on_guild_join(guild):
+    # Create embed to send
+    embed = discord.Embed(color = discord.Color.green(), title = "Covid19 India Bot", description = "Gives various statistics regarding Covid19 in India along with vaccination slots near you")
+    embed.add_field(name="Hello!", value="Thank you for adding the bot to your server! Use `.help` to find out what commands it currently supports!")
+    
+    for channels in guild.text_channels:
+        if channels.permissions_for(guild.me).send_messages:
+            await channels.send(embed=embed)
+            break
+
+@client.event
 async def on_message(ctx):
     if ctx.author.bot:
         pass
