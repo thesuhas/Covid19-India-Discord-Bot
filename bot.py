@@ -267,10 +267,7 @@ async def vaccine_slash(ctx, pincode = "", date = datetime.datetime.now().strfti
             await ctx.send("Invalid pincode")
             return
         # Extracting json data
-        try:
-            data = res.json()
-        except:
-            print("Invalid pincode")
+        data = res.json()
         sessions = dict()
         if len(data['centers']) > 0:
             for i in data['centers']:
