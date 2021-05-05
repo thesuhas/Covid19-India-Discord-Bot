@@ -112,7 +112,7 @@ async def _support(ctx, *params):
 async def help_command(ctx, text = ''):
     if text == '':
         embed = discord.Embed(color = discord.Color.green())
-        commands = "`.states` to get a list of states\n`.state {state}` to get cases in that particular state\n`.india` to get nationwide cases"
+        commands = "`.states` to get a list of states\n`.state {state}` to get cases in that particular state\n`.india` to get nationwide cases\n`.vaccine {pincode} {date}` to get vaccination slots near you. If `date` is not mentioned, will take today's date"
         embed.add_field(name = 'Commands', value = commands, inline = False)
         await ctx.send(embed = embed)
     else:
@@ -124,7 +124,7 @@ async def help_command(ctx, text = ''):
 async def help_slash(ctx):
     await ctx.defer()
     help_embed = discord.Embed(color = discord.Color.green())
-    commands = "`.states` to get a list of states\n`.state {state}` to get cases in that particular state\n`.india` to get nationwide cases"
+    commands = "`.states` to get a list of states\n`.state {state}` to get cases in that particular state\n`.india` to get nationwide cases\n`.vaccine {pincode} {date}` to get vaccination slots near you. If `date` is not mentioned, will take today's date"
     help_embed.add_field(name = 'Commands', value = commands, inline = False)
     await ctx.send(embeds = [help_embed])
 
@@ -209,6 +209,95 @@ async def states(ctx, text = ''):
         for i in s:
             string += i + '\n'
         await ctx.send(string)
+
+@client.command(aliases = ['vaccine'])
+async def vaccine_command(ctx, pincode = "", date = datetime.datetime.now().strftime("%d-%m-%Y")):
+    # If no pincode given
+    if pincode == "":
+        await ctx.send("No pincode mentioned")
+    else: 
+        headers = {"Accept-Language": "en-IN"}
+        data = {"pincode": pincode, "date": date}
+        res = requests.get("https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin", headers = headers, params = data)
+        if res.status_code == 400:
+            await ctx.send("Invalid pincode")
+            return
+        # Extracting json data
+        data = res.json()
+        sessions = dict()
+        if len(data['centers']) > 0:
+            for i in data['centers']:
+                #print(i)
+                # Look at all sessions
+                for j in i['sessions']:
+                    # If there is an available session
+                    if j['available_capacity'] > 0:
+                        # Check if hospital exists
+                        if i['name'] in sessions:
+                            sessions[i['name']].append(j)
+                        else:
+                            sessions[i['name']] = list()
+                            sessions[i['name']].append(j)
+            if len(sessions) == 0:
+                await ctx.send("No available sessions")
+            else:
+                # Create an embed for every session
+                for sesh in sessions:
+                    embed = discord.Embed(title = f"Vaccine Available at {sesh}", color = discord.Color.green())
+                    embed.add_field(name = 'Date', value = date, inline = False)
+                    embed.add_field(name = 'Available Capacity', value = sessions[sesh][0]['available_capacity'], inline = False)
+                    embed.add_field(name = 'Minimum Age', value = sessions[sesh][0]['min_age_limit'], inline = False)
+                    embed.add_field(name = 'Vaccine', value = sessions[sesh][0]['vaccine'])
+                    embed.add_field(name = "Slots", value = '\n'.join(sessions[sesh][0]['slots']), inline = False)
+                    await ctx.send(embed=embed)
+        else:
+            await ctx.send("No available vaccination center")
+
+@slash.slash(name = 'vaccine', description = 'List of Vaccination slotes near you')
+async def vaccine_slash(ctx, pincode = "", date = datetime.datetime.now().strftime("%d-%m-%Y")):
+    await ctx.defer()
+    # If no pincode given
+    if pincode == "":
+        await ctx.send("No pincode mentioned")
+    else: 
+        headers = {"Accept-Language": "en-IN"}
+        data = {"pincode": pincode, "date": date}
+        res = requests.get("https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin", headers = headers, params = data)
+        if res.status_code == 400:
+            await ctx.send("Invalid pincode")
+            return
+        # Extracting json data
+        data = res.json()
+        sessions = dict()
+        if len(data['centers']) > 0:
+            for i in data['centers']:
+                #print(i)
+                # Look at all sessions
+                for j in i['sessions']:
+                    # If there is an available session
+                    if j['available_capacity'] > 0:
+                        # Check if hospital exists
+                        if i['name'] in sessions:
+                            sessions[i['name']].append(j)
+                        else:
+                            sessions[i['name']] = list()
+                            sessions[i['name']].append(j)
+            if len(sessions) == 0:
+                await ctx.send("No available sessions")
+            else:
+                # Create an embed for every session
+                for sesh in sessions:
+                    embed = discord.Embed(title = f"Vaccine Available at {sesh}", color = discord.Color.green())
+                    embed.add_field(name = 'Date', value = date, inline = False)
+                    embed.add_field(name = 'Available Capacity', value = sessions[sesh][0]['available_capacity'], inline = False)
+                    embed.add_field(name = 'Minimum Age', value = sessions[sesh][0]['min_age_limit'], inline = False)
+                    embed.add_field(name = 'Vaccine', value = sessions[sesh][0]['vaccine'])
+                    embed.add_field(name = "Slots", value = '\n'.join(sessions[sesh][0]['slots']), inline = False)
+                    await ctx.send(embed=embed)
+        else:
+            await ctx.send("No available vaccination center")
+
+
 
 @tasks.loop(seconds = 86400)
 async def update_daily():
