@@ -227,7 +227,7 @@ async def vaccine_command(ctx, pincode = "", date = datetime.datetime.now().strf
     if pincode == "":
         await ctx.send("No pincode mentioned")
     else: 
-        headers = {"Accept-Language": "en-IN"}
+        headers = {"Accept-Language": "en-IN", 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
         data = {"pincode": pincode, "date": date}
         res = requests.get("https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin", headers = headers, params = data)
         if res.status_code == 400:
@@ -274,7 +274,7 @@ async def vaccine_slash(ctx, pincode = "", date = datetime.datetime.now().strfti
     if pincode == "":
         await ctx.send("No pincode mentioned")
     else: 
-        headers = {"Accept-Language": "en-IN"}
+        headers = {"Accept-Language": "en-IN", 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
         data = {"pincode": pincode, "date": date}
         res = requests.get("https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin", headers = headers, params = data)
         if res.status_code == 400:
