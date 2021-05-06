@@ -245,7 +245,7 @@ async def vaccine_command(ctx, pincode = "", date = datetime.datetime.now().strf
                 # Look at all sessions
                 for j in i['sessions']:
                     # If there is an available session
-                    if j['available_capacity'] > 0:
+                    if j['available_capacity'] >= 1:
                         # Check if hospital exists
                         if i['name'] in sessions:
                             sessions[i['name']].append(j)
@@ -292,7 +292,7 @@ async def vaccine_slash(ctx, pincode = "", date = datetime.datetime.now().strfti
                 # Look at all sessions
                 for j in i['sessions']:
                     # If there is an available session
-                    if j['available_capacity'] > 0:
+                    if j['available_capacity'] >= 1:
                         # Check if hospital exists
                         if i['name'] in sessions:
                             sessions[i['name']].append(j)
