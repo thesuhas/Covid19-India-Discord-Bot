@@ -91,13 +91,16 @@ async def on_guild_join(guild):
 
 
 @client.event
-async def on_message(ctx):
-    if ctx.author.bot:
-        pass
-    elif client.user.mentioned_in(ctx):
-        await ctx.channel.send(f"{ctx.author.mention} don't ping the bot da lawda")
+async def on_message(message):
+    if message.author.bot:
+        if((message.channel.id == 840644400564142111) and (message.author.id == 836578128305717279)):
+            await message.publish()
+        else:
+            pass
+    elif client.user.mentioned_in(message):
+        await message.channel.send(f"{ctx.author.mention} don't ping the bot da lawda")
     else:
-        await client.process_commands(ctx)
+        await client.process_commands(message)
 
 
 @client.command(aliases=['contribute', 'support'])
@@ -148,7 +151,7 @@ async def help_command(ctx, text=''):
 async def help_slash(ctx):
     await ctx.defer()
     help_embed = discord.Embed(color=discord.Color.green())
-    commands = "`.states` to get a list of states\n`.state {state}` to get cases in that particular state\n`.india` to get nationwide cases\n`.vaccine {pincode} {date}` to get vaccination slots near you. If `date` is not mentioned, will take today's date\n`.beds {type of hospital}` to get available beds. Type can be `government/govt` or `private`"
+    commands = "`.states` to get a list of states\n`.state {state}` to get cases in that particular state\n`.india` to get nationwide cases\n`.vaccine {pincode} {date}` to get vaccination slots near you. If `date` is not mentioned, will take today's date\n`.beds {type of hospital}` to get available beds. Type can be `government/govt` or `private`(Only Bengaluru)"
     help_embed.add_field(name='Commands', value=commands, inline=False)
     await ctx.send(embeds=[help_embed])
 
@@ -462,9 +465,8 @@ async def update():
     print("df Updated at: ", datetime.datetime.now())
 
 
-@tasks.loop(seconds=1800)
+@tasks.loop(seconds=300)
 async def alert():
-    blrchannel = client.get_channel(840644400564142111)
     date = datetime.datetime.now().strftime("%d-%m-%Y")
     datetom = (datetime.datetime.now() +
                datetime.timedelta(days=1)).strftime("%d-%m-%Y")
@@ -494,7 +496,7 @@ async def alert():
                             name='Vaccine', value=k['vaccine'])
                         embed.add_field(name="Slots", value='\n'.join(
                             k['slots']), inline=False)
-                        await client.blrchannel.send(embed=embed)
+                        await client.get_channel(840644400564142111).send(embed=embed)
                 else:
                     continue
 
