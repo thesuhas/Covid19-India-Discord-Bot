@@ -124,7 +124,7 @@ async def _support(ctx, *params):
 async def help_command(ctx, text = ''):
     if text == '':
         embed = discord.Embed(color = discord.Color.green())
-        commands = "`.states` to get a list of states\n`.state {state}` to get cases in that particular state\n`.india` to get nationwide cases\n`.vaccine {pincode} {date}` to get vaccination slots near you. If `date` is not mentioned, will take today's date\n`.beds {type of hospital}` to get available beds. Type can be `government` or `private`"
+        commands = "`.states` to get a list of states\n`.state {state}` to get cases in that particular state\n`.india` to get nationwide cases\n`.vaccine {pincode} {date}` to get vaccination slots near you. If `date` is not mentioned, will take today's date\n`.beds {type of hospital}` to get available beds. Type can be `government/govt` or `private`"
         embed.add_field(name = 'Commands', value = commands, inline = False)
         await ctx.send(embed = embed)
     else:
@@ -136,7 +136,7 @@ async def help_command(ctx, text = ''):
 async def help_slash(ctx):
     await ctx.defer()
     help_embed = discord.Embed(color = discord.Color.green())
-    commands = "`.states` to get a list of states\n`.state {state}` to get cases in that particular state\n`.india` to get nationwide cases\n`.vaccine {pincode} {date}` to get vaccination slots near you. If `date` is not mentioned, will take today's date\n`.beds {type of hospital}` to get available beds. Type can be `government` or `private`"
+    commands = "`.states` to get a list of states\n`.state {state}` to get cases in that particular state\n`.india` to get nationwide cases\n`.vaccine {pincode} {date}` to get vaccination slots near you. If `date` is not mentioned, will take today's date\n`.beds {type of hospital}` to get available beds. Type can be `government/govt` or `private`"
     help_embed.add_field(name = 'Commands', value = commands, inline = False)
     await ctx.send(embeds = [help_embed])
 
@@ -332,9 +332,14 @@ async def update_daily():
 
 @client.command(aliases = ['beds'])
 async def beds_command(ctx, hospital = ''):
+    hospital = hospital.lower()
     if hospital == '':
         await ctx.send("Mention type of hospital. Example: `.beds government`")
+    elif hospital != 'govt' and hospital != 'government' and hospital != 'private':
+        await ctx.send("Hospital types are: `government/govt` and `private`")
     else:
+        if hospital == 'govt':
+            hospital = "government"
         df = pd.read_html("https://bbmpgov.com/chbms/#A")
         keys = {"government": 2, "private": 4}
         df = df[keys[hospital]].sort_values(by=[(        'Net Available Beds for C+ Patients',            'Total')], ascending = False).reset_index(drop=True).drop([(                                   'SR. NO.',                '#')], axis = 1)[:10]
@@ -352,19 +357,27 @@ async def beds_command(ctx, hospital = ''):
 @slash.slash(name='beds', description = 'Hospitals with beds')
 async def beds_slash(ctx, hospital_type):
     hospital = hospital_type
-    df = pd.read_html("https://bbmpgov.com/chbms/#A")
-    keys = {"government": 2, "private": 4}
-    df = df[keys[hospital]].sort_values(by=[(        'Net Available Beds for C+ Patients',            'Total')], ascending = False).reset_index(drop=True).drop([(                                   'SR. NO.',                '#')], axis = 1)[:10]
-    df = df[[('Dedicated Covid Healthcare Centers (DCHCs)', 'Name of facility'),
+    hospital = hospital.lower()
+    if hospital == '':
+        await ctx.send("Mention type of hospital. Example: `.beds government`")
+    elif hospital != 'govt' and hospital != 'government' and hospital != 'private':
+        await ctx.send("Hospital types are: `government/govt` and `private`")
+    else:
+        if hospital == 'govt':
+            hospital = "government"
+        df = pd.read_html("https://bbmpgov.com/chbms/#A")
+        keys = {"government": 2, "private": 4}
+        df = df[keys[hospital]].sort_values(by=[(        'Net Available Beds for C+ Patients',            'Total')], ascending = False).reset_index(drop=True).drop([(                                   'SR. NO.',                '#')], axis = 1)[:10]
+        df = df[[('Dedicated Covid Healthcare Centers (DCHCs)', 'Name of facility'),
             (        'Net Available Beds for C+ Patients',              'Gen'),
             (        'Net Available Beds for C+ Patients',              'HDU'),
             (        'Net Available Beds for C+ Patients',              'ICU'),
             (        'Net Available Beds for C+ Patients',         'ICUVentl'),
             (        'Net Available Beds for C+ Patients',            'Total')]]
-    df.columns = ['Hospital', 'Gen', 'HDU', 'ICU', 'ICUVentl', 'Total']
-    dfi.export(df, 'test.png', table_conversion='matplotlib')
+        df.columns = ['Hospital', 'Gen', 'HDU', 'ICU', 'ICUVentl', 'Total']
+        dfi.export(df, 'test.png', table_conversion='matplotlib')
 
-    await ctx.send(file = discord.File('test.png'))
+        await ctx.send(file = discord.File('test.png'))
 
 # Updates dataframe every 30 mins
 @tasks.loop(seconds = 1800)
