@@ -464,43 +464,6 @@ async def update():
 
 @tasks.loop(seconds=1800)
 async def alert():
-    blrchannel = client.get_channel(838492835056713728)
-    date = datetime.datetime.now().strftime("%d-%m-%Y")
-    datetom = (datetime.datetime.now() +
-               datetime.timedelta(days=1)).strftime("%d-%m-%Y")
-    dates = [date, datetom]
-    d_ids = [276, 265, 294]
-    for i in dates:
-        for j in d_ids:
-            headers = {"Accept-Language": "en-IN",
-                       'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
-            data = {"district_id": j, "date": i}
-            res = requests.get(
-                "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict", headers=headers, params=data)
-            resp = res.json()
-            # print(res.status_code)
-            for k in resp['sessions']:
-                if(len(k) != 0):
-                    if(k['available_capacity'] > 0 and k['min_age_limit'] == 18):
-                        embed = discord.Embed(
-                            title=f"Vaccine Available at {k['name']}", color=discord.Color.green())
-                        embed.add_field(
-                            name='Date', value=k['date'], inline=False)
-                        embed.add_field(
-                            name='Available Capacity', value=k['available_capacity'], inline=False)
-                        embed.add_field(
-                            name='Minimum Age', value=k['min_age_limit'], inline=False)
-                        embed.add_field(
-                            name='Vaccine', value=k['vaccine'])
-                        embed.add_field(name="Slots", value='\n'.join(
-                            k['slots']), inline=False)
-                        await client.blrchannel.send(embed=embed)
-                else:
-                    continue
-
-
-@tasks.loop(seconds=1800)
-async def alert():
     blrchannel = client.get_channel(834036678875938816)
     date = datetime.datetime.now().strftime("%d-%m-%Y")
     datetom = (datetime.datetime.now() +
