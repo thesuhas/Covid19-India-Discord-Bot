@@ -464,7 +464,7 @@ async def update():
 
 @tasks.loop(seconds=1800)
 async def alert():
-    blrchannel = client.get_channel(834036678875938816)
+    blrchannel = client.get_channel(840644400564142111)
     date = datetime.datetime.now().strftime("%d-%m-%Y")
     datetom = (datetime.datetime.now() +
                datetime.timedelta(days=1)).strftime("%d-%m-%Y")
