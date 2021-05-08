@@ -338,12 +338,13 @@ async def beds_command(ctx, hospital = ''):
         df = pd.read_html("https://bbmpgov.com/chbms/#A")
         keys = {"government": 2, "private": 4}
         df = df[keys[hospital]].sort_values(by=[(        'Net Available Beds for C+ Patients',            'Total')], ascending = False).reset_index(drop=True).drop([(                                   'SR. NO.',                '#')], axis = 1)[:10]
-        df = df[[(        'Net Available Beds for C+ Patients',              'Gen'),
-                (        'Net Available Beds for C+ Patients',              'HDU'),
-                (        'Net Available Beds for C+ Patients',              'ICU'),
-                (        'Net Available Beds for C+ Patients',         'ICUVentl'),
-                (        'Net Available Beds for C+ Patients',            'Total')]]
-        df.columns = ['Gen', 'HDU', 'ICU', 'ICUVentl', 'Total']
+        df = df[[('Dedicated Covid Healthcare Centers (DCHCs)', 'Name of facility'),
+            (        'Net Available Beds for C+ Patients',              'Gen'),
+            (        'Net Available Beds for C+ Patients',              'HDU'),
+            (        'Net Available Beds for C+ Patients',              'ICU'),
+            (        'Net Available Beds for C+ Patients',         'ICUVentl'),
+            (        'Net Available Beds for C+ Patients',            'Total')]]
+        df.columns = ['Hospital', 'Gen', 'HDU', 'ICU', 'ICUVentl', 'Total']
         dfi.export(df, 'test.png', table_conversion='matplotlib')
 
         await ctx.send(file = discord.File('test.png'))
@@ -353,12 +354,13 @@ async def beds_slash(ctx, hospital):
     df = pd.read_html("https://bbmpgov.com/chbms/#A")
     keys = {"government": 2, "private": 4}
     df = df[keys[hospital]].sort_values(by=[(        'Net Available Beds for C+ Patients',            'Total')], ascending = False).reset_index(drop=True).drop([(                                   'SR. NO.',                '#')], axis = 1)[:10]
-    df = df[[(        'Net Available Beds for C+ Patients',              'Gen'),
+    df = df[[('Dedicated Covid Healthcare Centers (DCHCs)', 'Name of facility'),
+            (        'Net Available Beds for C+ Patients',              'Gen'),
             (        'Net Available Beds for C+ Patients',              'HDU'),
             (        'Net Available Beds for C+ Patients',              'ICU'),
             (        'Net Available Beds for C+ Patients',         'ICUVentl'),
             (        'Net Available Beds for C+ Patients',            'Total')]]
-    df.columns = ['Gen', 'HDU', 'ICU', 'ICUVentl', 'Total']
+    df.columns = ['Hospital', 'Gen', 'HDU', 'ICU', 'ICUVentl', 'Total']
     dfi.export(df, 'test.png', table_conversion='matplotlib')
 
     await ctx.send(file = discord.File('test.png'))
