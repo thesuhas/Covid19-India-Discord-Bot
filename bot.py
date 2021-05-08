@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 import os
 from discord_slash import SlashCommand
 import datetime
+import dataframe_image as dfi
 
 # Create a bot instance and sets a command prefix
 client = commands.Bot(command_prefix = '.', intents = discord.Intents.all())
@@ -267,7 +268,7 @@ async def vaccine_command(ctx, pincode = "", date = datetime.datetime.now().strf
         else:
             await ctx.send("No available vaccination center")
 
-@slash.slash(name = 'vaccine', description = 'List of Vaccination slotes near you')
+@slash.slash(name = 'vaccine', description = 'List of Vaccination slots near you')
 async def vaccine_slash(ctx, pincode = "", date = datetime.datetime.now().strftime("%d-%m-%Y")):
     await ctx.defer()
     # If no pincode given
@@ -314,8 +315,6 @@ async def vaccine_slash(ctx, pincode = "", date = datetime.datetime.now().strfti
         else:
             await ctx.send("No available vaccination center")
 
-
-
 @tasks.loop(seconds = 86400)
 async def update_daily():
     global df_daily
@@ -331,6 +330,38 @@ async def update_daily():
     df_daily.to_csv(file_daily)
     print("df_daily Updated at: ", datetime.datetime.now())
 
+@client.command(aliases = ['beds'])
+async def beds_command(ctx, hospital = ''):
+    if hospital == '':
+        await ctx.send("Mention type of hospital. Example: `.beds government`")
+    else:
+        df = pd.read_html("https://bbmpgov.com/chbms/#A")
+        keys = {"government": 2, "private": 4}
+        df = df[keys[hospital]].sort_values(by=[(        'Net Available Beds for C+ Patients',            'Total')], ascending = False).reset_index(drop=True).drop([(                                   'SR. NO.',                '#')], axis = 1)[:10]
+        df = df[[(        'Net Available Beds for C+ Patients',              'Gen'),
+                (        'Net Available Beds for C+ Patients',              'HDU'),
+                (        'Net Available Beds for C+ Patients',              'ICU'),
+                (        'Net Available Beds for C+ Patients',         'ICUVentl'),
+                (        'Net Available Beds for C+ Patients',            'Total')]]
+        df.columns = ['Gen', 'HDU', 'ICU', 'ICUVentl', 'Total']
+        dfi.export(df, 'test.png', table_conversion='matplotlib')
+
+        await ctx.send(file = discord.File('test.png'))
+
+@slash.slash(name='beds', description = 'Hospitals with beds')
+async def beds_slash(ctx, hospital):
+    df = pd.read_html("https://bbmpgov.com/chbms/#A")
+    keys = {"government": 2, "private": 4}
+    df = df[keys[hospital]].sort_values(by=[(        'Net Available Beds for C+ Patients',            'Total')], ascending = False).reset_index(drop=True).drop([(                                   'SR. NO.',                '#')], axis = 1)[:10]
+    df = df[[(        'Net Available Beds for C+ Patients',              'Gen'),
+            (        'Net Available Beds for C+ Patients',              'HDU'),
+            (        'Net Available Beds for C+ Patients',              'ICU'),
+            (        'Net Available Beds for C+ Patients',         'ICUVentl'),
+            (        'Net Available Beds for C+ Patients',            'Total')]]
+    df.columns = ['Gen', 'HDU', 'ICU', 'ICUVentl', 'Total']
+    dfi.export(df, 'test.png', table_conversion='matplotlib')
+
+    await ctx.send(file = discord.File('test.png'))
 
 # Updates dataframe every 30 mins
 @tasks.loop(seconds = 1800)

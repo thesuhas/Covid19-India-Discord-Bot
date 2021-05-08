@@ -1,3 +1,4 @@
 .env
 *.pem
 web_scrape.py
+test.png
