@@ -98,7 +98,7 @@ async def on_message(message):
         else:
             pass
     elif client.user.mentioned_in(message):
-        await message.channel.send(f"{ctx.author.mention} don't ping the bot da lawda")
+        await message.channel.send(f"{message.author.mention} don't ping the bot da lawda")
     else:
         await client.process_commands(message)
 
@@ -479,26 +479,30 @@ async def alert():
             data = {"district_id": j, "date": i}
             res = requests.get(
                 "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict", headers=headers, params=data)
-            resp = res.json()
-            # print(res.status_code)
-            for k in resp['sessions']:
-                if(len(k) != 0):
-                    if(k['available_capacity'] > 0 and k['min_age_limit'] == 18):
-                        embed = discord.Embed(
-                            title=f"Vaccine Available at {k['name']}", color=discord.Color.green())
-                        embed.add_field(
-                            name='Date', value=k['date'], inline=False)
-                        embed.add_field(
-                            name='Available Capacity', value=k['available_capacity'], inline=False)
-                        embed.add_field(
-                            name='Minimum Age', value=k['min_age_limit'], inline=False)
-                        embed.add_field(
-                            name='Vaccine', value=k['vaccine'])
-                        embed.add_field(name="Slots", value='\n'.join(
-                            k['slots']), inline=False)
-                        await client.get_channel(840644400564142111).send(embed=embed)
-                else:
-                    continue
+            #resp = res.json()
+            print(res.status_code)
+            if(res.status_code == 200):
+                resp = res.json()
+                for k in resp['sessions']:
+                    if(len(k) != 0):
+                        if(k['available_capacity'] > 0 and k['min_age_limit'] == 18):
+                            embed = discord.Embed(
+                                title=f"Vaccine Available at {k['name']}", color=discord.Color.green())
+                            embed.add_field(
+                                name='Date', value=k['date'], inline=False)
+                            embed.add_field(
+                                name='Available Capacity', value=k['available_capacity'], inline=False)
+                            embed.add_field(
+                                name='Minimum Age', value=k['min_age_limit'], inline=False)
+                            embed.add_field(
+                                name='Vaccine', value=k['vaccine'])
+                            embed.add_field(name="Slots", value='\n'.join(
+                                k['slots']), inline=False)
+                            await client.get_channel(840644400564142111).send(embed=embed)
+                    else:
+                        continue
+            else:
+                continue
 
 
 # Runs the bot
