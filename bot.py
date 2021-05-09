@@ -465,7 +465,7 @@ async def update():
     print("df Updated at: ", datetime.datetime.now())
 
 
-@tasks.loop(seconds=300)
+@tasks.loop(seconds=120)
 async def alert():
     date = datetime.datetime.now().strftime("%d-%m-%Y")
     datetom = (datetime.datetime.now() +
