@@ -289,7 +289,7 @@ async def vaccine_command(ctx, pincode="", date=datetime.datetime.now().strftime
         sessions = dict()
         if len(data['centers']) > 0:
             for i in data['centers']:
-                # print(i)
+
                 # Look at all sessions
                 for j in i['sessions']:
                     # If there is an available session
@@ -390,7 +390,7 @@ async def update_daily():
     t = t.strftime("%d-%b-%y")
     df_daily = df1[df1['Date'] == t]
     df_daily.to_csv(file_daily)
-    print("df_daily Updated at: ", datetime.datetime.now())
+    #print("df_daily Updated at: ", datetime.datetime.now())
 
 
 @client.command(aliases=['beds'])
@@ -462,7 +462,7 @@ async def update():
     df["State"] = df["State"].str.lower()
     df.to_csv(filename)
     # Prints when df is last updated
-    print("df Updated at: ", datetime.datetime.now())
+    #print("df Updated at: ", datetime.datetime.now())
 
 
 @tasks.loop(seconds=120)
@@ -480,7 +480,7 @@ async def alert():
             res = requests.get(
                 "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict", headers=headers, params=data)
             #resp = res.json()
-            print(res.status_code)
+            # print(res.status_code)
             if(res.status_code == 200):
                 resp = res.json()
                 for k in resp['sessions']:
@@ -491,14 +491,19 @@ async def alert():
                             embed.add_field(
                                 name='Date', value=k['date'], inline=False)
                             embed.add_field(
+                                name='Pincode', value=k['pincode'], inline=False)
+                            embed.add_field(
                                 name='Available Capacity', value=k['available_capacity'], inline=False)
                             embed.add_field(
                                 name='Minimum Age', value=k['min_age_limit'], inline=False)
                             embed.add_field(
                                 name='Vaccine', value=k['vaccine'])
+                            embed.add_field(
+                                name='Fee type', value=k['fee_type'], inline=False)
                             embed.add_field(name="Slots", value='\n'.join(
                                 k['slots']), inline=False)
                             await client.get_channel(840644400564142111).send(embed=embed)
+                            # await client.get_channel(for_testing).send(embed=embed)
                     else:
                         continue
             else:
