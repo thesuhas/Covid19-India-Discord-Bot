@@ -72,7 +72,8 @@ async def on_ready():
     t = t.strftime("%d-%b-%y")
     df_daily = df1[df1['Date'] == t]
     df_daily.to_csv(file_daily)
-
+    activity = discord.Activity(name="Plague Inc.", type = discord.ActivityType.playing)
+    await client.change_presence(activity=activity)
     await client.get_channel(810508395546542120).send(f"Bot is online")
 
 
@@ -483,9 +484,11 @@ async def alert():
             # print(res.status_code)
             if(res.status_code == 200):
                 resp = res.json()
+                #print(resp)
                 for k in resp['sessions']:
                     if(len(k) != 0):
-                        if(k['available_capacity'] >= 1 and k['min_age_limit'] == 18):
+                        #print(k['available_capacity'], k['min_age_limit'])
+                        if(int(k['available_capacity']) >= 1 and k['min_age_limit'] == 18):
                             embed = discord.Embed(
                                 title=f"Vaccine Available at {k['name']}", color=discord.Color.green())
                             embed.add_field(
