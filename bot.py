@@ -117,15 +117,16 @@ async def on_guild_remove(guild):
     fp.close()
 
     new = list()
-    with open('guilds.csv', 'r')as inputfile:
-        for row in csv.reader(inputfile):
-            new.append(row[0])
+    with open('guilds.csv', 'r') as inputfile:
+    reader = csv.reader(inputfile)
+    for row in reader:
+        new.append(row[0])
 
-    with open('guilds.csv', 'w') as inputfile:
+    with open('guilds.csv', 'w', newline='') as inputfile:
         writer = csv.writer(inputfile)
         for i in new:
-            if str(guild.id) not in i:
-                writer.writerow(i)
+            if str(guild) not in i:
+                writer.writerow([i])
 
 
 
