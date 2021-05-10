@@ -11,6 +11,7 @@ from discord_slash import SlashCommand
 import datetime
 import dataframe_image as dfi
 import math
+import csv
 
 # Create a bot instance and sets a command prefix
 client = commands.Bot(command_prefix='.', intents=discord.Intents.all())
@@ -95,6 +96,11 @@ async def on_guild_join(guild):
             await channels.send(embed=embed)
             break
 
+    with open('guilds.csv', 'a') as inputfile:
+        id = str(guild.id) + '\n'
+        inputfile.write(id)
+
+
 
 @client.event
 async def on_guild_remove(guild):
@@ -109,6 +115,19 @@ async def on_guild_remove(guild):
     fp = open('guilds.txt', 'w')
     fp.write(dat)
     fp.close()
+
+    new = list()
+    with open('guilds.csv', 'r')as inputfile:
+        for row in csv.reader(inputfile):
+            new.append(row[0])
+
+    with open('guilds.csv', 'w') as inputfile:
+        writer = csv.writer(inputfile)
+        for i in new:
+            if str(guild.id) not in i:
+                writer.writerow(i)
+
+
 
 
 @client.event
