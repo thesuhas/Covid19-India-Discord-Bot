@@ -206,6 +206,7 @@ async def help_slash(ctx):
 
 @client.command(aliases=['state'])
 async def state_command(ctx, *, state=''):
+    state=state.lower()
     if state == '':
         # If state has not been mentioned
         embed = discord.Embed(title="State", color=discord.Color.green(
