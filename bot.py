@@ -60,6 +60,7 @@ async def on_ready():
     # Making column lower case
     df["State"] = df["State"].str.lower()
     df.to_csv(filename)
+    print("df Updated at: ", datetime.datetime.now())
 
     # Creating daily df
     response = requests.get(
@@ -72,6 +73,8 @@ async def on_ready():
     t = t.strftime("%d-%b-%y")
     df_daily = df1[df1['Date'] == t]
     df_daily.to_csv(file_daily)
+    print("df_daily Updated at: ", datetime.datetime.now())
+
     activity = discord.Activity(name="Plague Inc.", type = discord.ActivityType.playing)
     await client.change_presence(activity=activity)
     await client.get_channel(810508395546542120).send(f"Bot is online")
@@ -391,7 +394,7 @@ async def update_daily():
     t = t.strftime("%d-%b-%y")
     df_daily = df1[df1['Date'] == t]
     df_daily.to_csv(file_daily)
-    #print("df_daily Updated at: ", datetime.datetime.now())
+    print("df_daily Updated at: ", datetime.datetime.now())
 
 
 @client.command(aliases=['beds'])
@@ -463,7 +466,7 @@ async def update():
     df["State"] = df["State"].str.lower()
     df.to_csv(filename)
     # Prints when df is last updated
-    #print("df Updated at: ", datetime.datetime.now())
+    print("df Updated at: ", datetime.datetime.now())
 
 
 @tasks.loop(seconds=120)
@@ -487,8 +490,8 @@ async def alert():
                 #print(resp)
                 for k in resp['sessions']:
                     if(len(k) != 0):
-                        #print(k['available_capacity'], k['min_age_limit'])
                         if(int(k['available_capacity']) >= 1 and k['min_age_limit'] == 18):
+                            print(k)
                             embed = discord.Embed(
                                 title=f"Vaccine Available at {k['name']}", color=discord.Color.green())
                             embed.add_field(
@@ -505,7 +508,7 @@ async def alert():
                                 name='Fee type', value=k['fee_type'], inline=False)
                             embed.add_field(name="Slots", value='\n'.join(
                                 k['slots']), inline=False)
-                            await client.get_channel(840644400564142111).send(embed=embed)
+                            await client.get_channel(810508395546542120).send(embed=embed)
                             # await client.get_channel(for_testing).send(embed=embed)
                     else:
                         continue
