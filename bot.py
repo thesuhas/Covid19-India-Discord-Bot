@@ -10,6 +10,7 @@ import os
 from discord_slash import SlashCommand
 import datetime
 import dataframe_image as dfi
+import math
 
 # Create a bot instance and sets a command prefix
 client = commands.Bot(command_prefix='.', intents=discord.Intents.all())
@@ -45,7 +46,6 @@ async def on_ready():
     # Start updation loop
     update.start()
     update_daily.start()
-    alert.start()
     # Create basic data frame and store
     test = requests.get(
         'https://api.covid19india.org/csv/latest/state_wise.csv')
@@ -87,6 +87,12 @@ async def on_guild_join(guild):
                           description="Gives various statistics regarding Covid19 in India along with vaccination slots near you")
     embed.add_field(
         name="Hello!", value="Thank you for adding the bot to your server! Use `.help` to find out what commands it currently supports!")
+
+    # Creating role
+    perms = discord.Permissions(send_messages = True, embed_links = True, attach_files = True)
+    await guild.create_role(name="Covid19 India Bot", permissions=perms)
+    # Giving itself the role
+    await client.add_
 
     for channels in guild.text_channels:
         if channels.permissions_for(guild.me).send_messages:
@@ -467,54 +473,6 @@ async def update():
     df.to_csv(filename)
     # Prints when df is last updated
     print("df Updated at: ", datetime.datetime.now())
-
-
-@tasks.loop(seconds=120)
-async def alert():
-    date = datetime.datetime.now().strftime("%d-%m-%Y")
-    datetom = (datetime.datetime.now() +
-               datetime.timedelta(days=1)).strftime("%d-%m-%Y")
-    dates = [date, datetom]
-    d_ids = [276, 265, 294]
-    for i in dates:
-        for j in d_ids:
-            headers = {"Accept-Language": "en-IN",
-                       'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
-            data = {"district_id": j, "date": i}
-            res = requests.get(
-                "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict", headers=headers, params=data)
-            #resp = res.json()
-            # print(res.status_code)
-            if(res.status_code == 200):
-                resp = res.json()
-                #print(resp)
-                for k in resp['sessions']:
-                    if(len(k) != 0):
-                        if(int(k['available_capacity']) >= 1 and k['min_age_limit'] == 18):
-                            print(k)
-                            embed = discord.Embed(
-                                title=f"Vaccine Available at {k['name']}", color=discord.Color.green())
-                            embed.add_field(
-                                name='Date', value=k['date'], inline=False)
-                            embed.add_field(
-                                name='Pincode', value=k['pincode'], inline=False)
-                            embed.add_field(
-                                name='Available Capacity', value=k['available_capacity'], inline=False)
-                            embed.add_field(
-                                name='Minimum Age', value=k['min_age_limit'], inline=False)
-                            embed.add_field(
-                                name='Vaccine', value=k['vaccine'])
-                            embed.add_field(
-                                name='Fee type', value=k['fee_type'], inline=False)
-                            embed.add_field(name="Slots", value='\n'.join(
-                                k['slots']), inline=False)
-                            await client.get_channel(840644400564142111).send(embed=embed)
-                            # await client.get_channel(for_testing).send(embed=embed)
-                    else:
-                        continue
-            else:
-                continue
-
 
 # Runs the bot
 client.run(os.getenv('TOKEN'))
