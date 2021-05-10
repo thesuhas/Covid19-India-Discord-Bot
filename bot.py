@@ -508,7 +508,7 @@ async def alert():
                                 name='Fee type', value=k['fee_type'], inline=False)
                             embed.add_field(name="Slots", value='\n'.join(
                                 k['slots']), inline=False)
-                            await client.get_channel(810508395546542120).send(embed=embed)
+                            await client.get_channel(840644400564142111).send(embed=embed)
                             # await client.get_channel(for_testing).send(embed=embed)
                     else:
                         continue
