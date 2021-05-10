@@ -151,6 +151,11 @@ async def _support(ctx, *params):
     await ctx.send(embed=Embeds)
 
 
+@client.command(aliases = ['invite'])
+async def invite_command(ctx):
+    await ctx.send("Invite me to your server with this link:\nhttps://bit.ly/covid-india-bot")
+
+
 @client.command(aliases=['h', 'help'])
 async def help_command(ctx, text=''):
     if text == '':
