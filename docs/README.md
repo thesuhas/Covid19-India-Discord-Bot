@@ -13,6 +13,9 @@
 
 The source code for the bot with COVID-19 statistics of India
 
+Invite the bot to your discord server with [this link](https://bit.ly/covid-india-bot)
+You can send suggestions and feedback to covidindiabot@gmail.com
+
 Download the required modules by using the following command:
 
 `pip3 install -r requirements.txt`
