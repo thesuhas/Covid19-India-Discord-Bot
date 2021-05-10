@@ -485,7 +485,7 @@ async def alert():
                 resp = res.json()
                 for k in resp['sessions']:
                     if(len(k) != 0):
-                        if(k['available_capacity'] > 0 and k['min_age_limit'] == 18):
+                        if(k['available_capacity'] >= 1 and k['min_age_limit'] == 18):
                             embed = discord.Embed(
                                 title=f"Vaccine Available at {k['name']}", color=discord.Color.green())
                             embed.add_field(
