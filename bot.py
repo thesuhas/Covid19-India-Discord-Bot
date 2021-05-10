@@ -148,6 +148,7 @@ async def _support(ctx, *params):
         suhas, stark, sapota, sach), inline=False)
     Embeds.add_field(
         name="Important", value="**Under no circumstances is anyone allowed to merge to the main branch.**", inline=False)
+    Embeds.add_field(name="\u200b", value="You can send suggestions and feedback to covidindiabot@gmail.com")
     await ctx.send(embed=Embeds)
 
 
