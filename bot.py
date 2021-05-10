@@ -118,9 +118,9 @@ async def on_guild_remove(guild):
 
     new = list()
     with open('guilds.csv', 'r') as inputfile:
-    reader = csv.reader(inputfile)
-    for row in reader:
-        new.append(row[0])
+        reader = csv.reader(inputfile)
+        for row in reader:
+            new.append(row[0])
 
     with open('guilds.csv', 'w', newline='') as inputfile:
         writer = csv.writer(inputfile)
