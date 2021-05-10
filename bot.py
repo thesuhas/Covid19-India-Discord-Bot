@@ -160,7 +160,7 @@ async def invite_command(ctx):
 async def help_command(ctx, text=''):
     if text == '':
         embed = discord.Embed(color=discord.Color.green())
-        commands = "`.states` to get a list of states\n`.state {state}` to get cases in that particular state\n`.india` to get nationwide cases\n`.vaccine {pincode} {date}` to get vaccination slots near you. If `date` is not mentioned, will take today's date\n`.beds {type of hospital}` to get available beds. Type can be `government/govt` or `private`\n`.alerts {channel name}` to register any channel on your server to get important alerts from the developers"
+        commands = "`.states` to get a list of states\n`.state {state}` to get cases in that particular state\n`.india` to get nationwide cases\n`.vaccine {pincode} {date}` to get vaccination slots near you. If `date` is not mentioned, will take today's date\n`.beds {type of hospital}` to get available beds. Type can be `government/govt` or `private`\n`.alerts {channel name}`(only for members with \"Manage Server\" permissions) to register any channel on your server to get important alerts from the developers\n`.invite` to get the invite link of the bot"
         embed.add_field(name='Commands', value=commands, inline=False)
         await ctx.send(embed=embed)
     else:
