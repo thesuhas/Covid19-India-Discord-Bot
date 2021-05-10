@@ -46,6 +46,7 @@ async def on_ready():
     # Start updation loop
     update.start()
     update_daily.start()
+    alert.start()
     # Create basic data frame and store
     test = requests.get(
         'https://api.covid19india.org/csv/latest/state_wise.csv')
@@ -75,7 +76,8 @@ async def on_ready():
     df_daily.to_csv(file_daily)
     print("df_daily Updated at: ", datetime.datetime.now())
 
-    activity = discord.Activity(name="Plague Inc.", type = discord.ActivityType.playing)
+    activity = discord.Activity(
+        name="Plague Inc.", type=discord.ActivityType.playing)
     await client.change_presence(activity=activity)
     await client.get_channel(810508395546542120).send(f"Bot is online")
 
@@ -148,11 +150,12 @@ async def _support(ctx, *params):
         suhas, stark, sapota, sach), inline=False)
     Embeds.add_field(
         name="Important", value="**Under no circumstances is anyone allowed to merge to the main branch.**", inline=False)
-    Embeds.add_field(name="\u200b", value="You can send suggestions and feedback to covidindiabot@gmail.com")
+    Embeds.add_field(
+        name="\u200b", value="You can send suggestions and feedback to covidindiabot@gmail.com")
     await ctx.send(embed=Embeds)
 
 
-@client.command(aliases = ['invite'])
+@client.command(aliases=['invite'])
 async def invite_command(ctx):
     await ctx.send("Invite me to your server with this link:\nhttps://bit.ly/covid-india-bot")
 
@@ -490,8 +493,53 @@ async def update():
     print("df Updated at: ", datetime.datetime.now())
 
 
-@client.command(aliases = ['alerts'])
-async def alerts_command(ctx, dest:discord.TextChannel = None):
+@tasks.loop(seconds=120)
+async def alert():
+    date = datetime.datetime.now().strftime("%d-%m-%Y")
+    datetom = (datetime.datetime.now() +
+               datetime.timedelta(days=1)).strftime("%d-%m-%Y")
+    dates = [date, datetom]
+    d_ids = [276, 265, 294]
+    for i in dates:
+        for j in d_ids:
+            headers = {"Accept-Language": "en-IN",
+                       'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
+            data = {"district_id": j, "date": i}
+            res = requests.get(
+                "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict", headers=headers, params=data)
+            #resp = res.json()
+            # print(res.status_code)
+            if(res.status_code == 200):
+                resp = res.json()
+                for k in resp['sessions']:
+                    if(len(k) != 0):
+                        if(math.trunc(k['available_capacity']) >= 2 and k['min_age_limit'] == 18 and ((k['available_capacity'])-int(k['available_capacity'])) == 0):
+                            embed = discord.Embed(
+                                title=f"Vaccine Available at {k['name']}", color=discord.Color.green())
+                            embed.add_field(
+                                name='Date', value=k['date'], inline=False)
+                            embed.add_field(
+                                name='Pincode', value=k['pincode'], inline=False)
+                            embed.add_field(
+                                name='Available Capacity', value=k['available_capacity'], inline=False)
+                            embed.add_field(
+                                name='Minimum Age', value=k['min_age_limit'], inline=False)
+                            embed.add_field(
+                                name='Vaccine', value=k['vaccine'])
+                            embed.add_field(
+                                name='Fee type', value=k['fee_type'], inline=False)
+                            embed.add_field(name="Slots", value='\n'.join(
+                                k['slots']), inline=False)
+                            await client.get_channel(840644400564142111).send(embed=embed)
+                            # await client.get_channel(838492835056713728).send(embed=embed)
+                    else:
+                        continue
+            else:
+                continue
+
+
+@client.command(aliases=['alerts'])
+async def alerts_command(ctx, dest: discord.TextChannel = None):
     if(dest == None):
         await ctx.send("Mention the channel you want to send alerts to")
         return
@@ -512,8 +560,8 @@ async def alerts_command(ctx, dest:discord.TextChannel = None):
         await ctx.send("Looks like you don't have the manage server permissions to run this")
 
 
-@client.command(aliases = ['announce'])
-async def announce_command(ctx, msg:str = ''):
+@client.command(aliases=['announce'])
+async def announce_command(ctx, msg: str = ''):
     if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872)):
         if(msg == ''):
             await ctx.send("Get a message man")
@@ -521,7 +569,8 @@ async def announce_command(ctx, msg:str = ''):
         else:
             pass
         fp = open('guilds.txt', 'r')
-        ch_list = [line.split(',')[1] for line in list(filter(None, fp.read().split('\n')))]
+        ch_list = [line.split(',')[1] for line in list(
+            filter(None, fp.read().split('\n')))]
         for ch in ch_list:
             await client.get_channel(int(ch)).send(f"**NEW ALERT FROM THE DEVS**\n\n{msg}")
     else:
