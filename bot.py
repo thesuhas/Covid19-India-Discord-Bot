@@ -125,7 +125,7 @@ async def on_guild_remove(guild):
     with open('guilds.csv', 'w', newline='') as inputfile:
         writer = csv.writer(inputfile)
         for i in new:
-            if str(guild) not in i:
+            if str(guild) not in [i]:
                 writer.writerow([i])
 
 
