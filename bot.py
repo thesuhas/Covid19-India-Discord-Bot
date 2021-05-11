@@ -160,6 +160,7 @@ async def guilds_command(ctx):
     else:
         await ctx.send("You are not authorised for this")
 
+
 @client.command(aliases=['contribute', 'support'])
 async def _support(ctx, *params):
     Embeds = discord.Embed(title="Contributions", color=0x00ff00)
@@ -199,17 +200,17 @@ async def invite_command(ctx):
 @client.command(aliases=['h', 'help'])
 async def help_command(ctx, text=''):
     if text == '':
-        help_embed = discord.Embed(color=discord.Color.green())
-        help_embed.add_field(name='`.india`', value='Get COVID-19 stats of the entire nation', inline=False)
-        help_embed.add_field(name='`.states`', value='Get a list of states', inline=False)
-        help_embed.add_field(name='`.state {state}`', value='Get cases in that particular state', inline=False)
-        help_embed.add_field(name='`.vaccine {pincode} [date]`', value='Get vaccination slots near you. If `date` is not mentioned, it will take today\'s date', inline=False)
-        help_embed.add_field(name='`.beds {type of hospital}`', value='Get available beds. Type can be `government/govt` or `private`(Only Bengaluru)', inline=False)
-        help_embed.add_field(name='`.alerts {channel name}`', value='(only for members with \"Manage Server\" permissions) To register any channel on your server to get important alerts from the developers', inline=False)
-        help_embed.add_field(name='`.removealerts`', value='(only for members with \"Manage Server\" permissions) To de-register any channel that was registered for alerts', inline=False)
-        help_embed.add_field(name='`.invite`', value='Get the invite link of the bot', inline=False)
-        help_embed.add_field(name='`.contribute`', value='If you wish to contribute or learn about the bot', inline=False)
-        help_embed.add_field(name='`.reachout`', value='(only for Server Administrators) To reach out to the bot developers', inline=False)
+        help_embed = discord.Embed(title="**Help**", color=discord.Color.green())
+        help_embed.add_field(name='**`.india`**', value='Get COVID-19 stats of the entire nation', inline=False)
+        help_embed.add_field(name='**`.states`**', value='Get a list of states', inline=False)
+        help_embed.add_field(name='**`.state {state}`**', value='Get cases in that particular state', inline=False)
+        help_embed.add_field(name='**`.vaccine {pincode} [date]`**', value='Get vaccination slots near you. If `date` is not mentioned, it will take today\'s date', inline=False)
+        help_embed.add_field(name='**`.beds {type of hospital}`**', value='Get available beds. Type can be `government/govt` or `private`(Only Bengaluru)', inline=False)
+        help_embed.add_field(name='**`.alerts {channel name}`**', value='(only for members with \"Manage Server\" permissions) To register any channel on your server to get important alerts from the developers', inline=False)
+        help_embed.add_field(name='**`.removealerts`**', value='(only for members with \"Manage Server\" permissions) To de-register any channel that was registered for alerts', inline=False)
+        help_embed.add_field(name='**`.invite`**', value='Get the invite link of the bot', inline=False)
+        help_embed.add_field(name='**`.contribute`**', value='If you wish to contribute or learn about the bot', inline=False)
+        help_embed.add_field(name='**`.reachout`**', value='(only for Server Administrators) To reach out to the bot developers', inline=False)
         await ctx.send(embed=help_embed)
     else:
         embed = discord.Embed(title='help', color=discord.Color.green(
@@ -222,18 +223,17 @@ async def help_command(ctx, text=''):
 @slash.slash(name="help", description="Commands available from me")
 async def help_slash(ctx):
     await ctx.defer()
-    help_embed = discord.Embed(title="Help", color=discord.Color.green())
-    help_embed.add_field(name='`.india`', value='Get COVID-19 stats of the entire nation', inline=False)
-    help_embed.add_field(name='`.states`', value='Get a list of states', inline=False)
-    help_embed.add_field(name='`.state {state}`', value='Get cases in that particular state', inline=False)
-    help_embed.add_field(name='`.vaccine {pincode} [date]`', value='Get vaccination slots near you. If `date` is not mentioned, it will take today\'s date', inline=False)
-    help_embed.add_field(name='`.beds {type of hospital}`', value='Get available beds. Type can be `government/govt` or `private`(Only Bengaluru)', inline=False)
-    help_embed.add_field(name='`.alerts {channel name}`', value='(only for members with \"Manage Server\" permissions) To register any channel on your server to get important alerts from the developers', inline=False)
-    help_embed.add_field(name='`.removealerts`', value='(only for members with \"Manage Server\" permissions) To de-register any channel that was registered for alerts', inline=False)
-    help_embed.add_field(name='`.invite`', value='Get the invite link of the bot', inline=False)
-    help_embed.add_field(name='`.contribute`', value='If you wish to contribute or learn about the bot', inline=False)
-    help_embed.add_field(name='`.reachout`', value='(only for Server Administrators) To reach out to the bot developers', inline=False)
-    # help_embed.add_field(name='`.`', value='', inline=False)
+    help_embed = discord.Embed(title="**Help**", color=discord.Color.green())
+    help_embed.add_field(name='**`.india`**', value='Get COVID-19 stats of the entire nation', inline=False)
+    help_embed.add_field(name='**`.states`**', value='Get a list of states', inline=False)
+    help_embed.add_field(name='**`.state {state}`**', value='Get cases in that particular state', inline=False)
+    help_embed.add_field(name='**`.vaccine {pincode} [date]`**', value='Get vaccination slots near you. If `date` is not mentioned, it will take today\'s date', inline=False)
+    help_embed.add_field(name='**`.beds {type of hospital}`**', value='Get available beds. Type can be `government/govt` or `private`(Only Bengaluru)', inline=False)
+    help_embed.add_field(name='**`.alerts {channel name}`**', value='(only for members with \"Manage Server\" permissions) To register any channel on your server to get important alerts from the developers', inline=False)
+    help_embed.add_field(name='**`.removealerts`**', value='(only for members with \"Manage Server\" permissions) To de-register any channel that was registered for alerts', inline=False)
+    help_embed.add_field(name='**`.invite`**', value='Get the invite link of the bot', inline=False)
+    help_embed.add_field(name='**`.contribute`**', value='If you wish to contribute or learn about the bot', inline=False)
+    help_embed.add_field(name='**`.reachout`**', value='(only for Server Administrators) To reach out to the bot developers', inline=False)
     await ctx.send(embeds=[help_embed])
 
 
