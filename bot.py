@@ -140,7 +140,7 @@ async def file_command(ctx):
             await client.get_channel(841561036305465344).send(file=discord.File(fp, 'alerts.csv'))
         fp.close()
     else:
-        await ctx.send("You are not authorrised to run this command")
+        await ctx.send("You are not authorised to run this command")
 
 
 @client.command(aliases = ['guilds'])
