@@ -144,6 +144,20 @@ async def on_message(message):
         await client.process_commands(message)
 
 
+@client.command(aliases=['file', 'f'])
+async def file_command(ctx):
+    if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872)):
+        await ctx.send("You have clearance")
+        with open('guilds.txt', 'r') as fp:
+            await client.get_channel(810508395546542120).send(file=discord.File(fp, 'guilds.txt'))
+        fp.close()
+        with open('guilds.csv', 'r') as fp:
+            await client.get_channel(810508395546542120).send(file=discord.File(fp, 'guilds.csv'))
+        fp.close()
+    else:
+        await ctx.send("You are not authorrised to run this command")
+
+
 @client.command(aliases=['contribute', 'support'])
 async def _support(ctx, *params):
     Embeds = discord.Embed(title="Contributions", color=0x00ff00)
