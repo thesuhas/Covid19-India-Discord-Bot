@@ -672,7 +672,7 @@ async def announce_command(ctx, msg: str = ''):
 
 
 @client.command(aliases=['reachout'])
-async def reachout_command(ctx, msg: str = ''):
+async def reachout_command(ctx, *, msg: str = ''):
     if(msg == ''):
         await ctx.send("Type a message to send to the developers")
         return
