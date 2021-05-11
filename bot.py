@@ -1,3 +1,4 @@
+from typing_extensions import TypeAlias
 import requests
 import pandas as pd
 import io
@@ -80,7 +81,7 @@ async def on_ready():
     activity = discord.Activity(
         name="Plague Inc.", type=discord.ActivityType.playing)
     await client.change_presence(activity=activity)
-    await client.get_channel(810508395546542120).send(f"Bot is online")
+    await client.get_channel(841561036305465344).send(f"Bot is online")
 
 
 @client.event
@@ -89,23 +90,24 @@ async def on_guild_join(guild):
     embed = discord.Embed(color=discord.Color.green(), title="Covid19 India Bot",
                           description="Gives various statistics regarding Covid19 in India along with vaccination slots near you")
     embed.add_field(
-        name="Hello!", value="Thank you for adding the bot to your server! Use `.help` to find out what commands it currently supports!\n\nMembers with the `Manage Server` permissions are requested to run `.alerts {channel_name}` command to receive important updates from the developers")
+        name="Hello!", value="Thank you for adding the bot to your server! Use `.help` to find out what commands it currently supports!")
+    alerts_embed = discord.Embed(color=discord.Color.green(), title="IMPORTANT")
+    alerts_embed.add_field(name="\u200b", value="Members with the `Manage Server` permissions are requested to run `.alerts {channel_name}` command to receive important updates from the developers")
 
     for channels in guild.text_channels:
         if channels.permissions_for(guild.me).send_messages:
             await channels.send(embed=embed)
+            await channels.send(embed=alerts_embed)
             break
-
-    with open('guilds.csv', 'a') as inputfile:
-        id = str(guild.id) + '\n'
-        inputfile.write(id)
-
+    ownerObj = guild.owner
+    try:
+        await ownerObj.send("Thank you for adding me to your server! It is important that you run the `.alerts {channel.name}` command so that you get important updates from the developers.\nIf you have any questions or queries, you can mail us at covidindiabot@gmail.com")
+    except:
+        pass
 
 
 @client.event
 async def on_guild_remove(guild):
-    # print(guild.id)
-    # print(type(guild.id))
     dat = ''
     fp = open('guilds.txt', 'r')
     for line1 in fp:
@@ -115,20 +117,6 @@ async def on_guild_remove(guild):
     fp = open('guilds.txt', 'w')
     fp.write(dat)
     fp.close()
-
-    new = list()
-    with open('guilds.csv', 'r') as inputfile:
-        reader = csv.reader(inputfile)
-        for row in reader:
-            new.append(row[0])
-
-    with open('guilds.csv', 'w', newline='') as inputfile:
-        writer = csv.writer(inputfile)
-        for i in new:
-            if str(guild) not in [i]:
-                writer.writerow([i])
-
-
 
 
 @client.event
@@ -149,14 +137,28 @@ async def file_command(ctx):
     if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872)):
         await ctx.send("You have clearance")
         with open('guilds.txt', 'r') as fp:
-            await client.get_channel(810508395546542120).send(file=discord.File(fp, 'guilds.txt'))
-        fp.close()
-        with open('guilds.csv', 'r') as fp:
-            await client.get_channel(810508395546542120).send(file=discord.File(fp, 'guilds.csv'))
+            await client.get_channel(841561036305465344).send(file=discord.File(fp, 'guilds.txt'))
         fp.close()
     else:
         await ctx.send("You are not authorrised to run this command")
 
+
+@client.command(aliases = ['guilds'])
+async def guilds_command(ctx):
+    if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872)):
+        await ctx.channel.trigger_typing()
+        dat = 'SERVER NAME,SERVER ID\n\n'
+        guilds_details = await client.fetch_guilds(limit=150).flatten()
+        for guild_deets in guilds_details:
+            dat += f"{guild_deets.name},{guild_deets.id}\n"
+        with open('temp.csv', 'w+') as fp:
+            fp.write(dat)
+        await ctx.send("You have clearance")
+        await client.get_channel(841561036305465344).send(file=discord.File('temp.csv'))
+        fp.close()
+        os.remove('temp.csv')
+    else:
+        await ctx.send("You are not authorised for this")
 
 @client.command(aliases=['contribute', 'support'])
 async def _support(ctx, *params):
@@ -197,10 +199,18 @@ async def invite_command(ctx):
 @client.command(aliases=['h', 'help'])
 async def help_command(ctx, text=''):
     if text == '':
-        embed = discord.Embed(color=discord.Color.green())
-        commands = "`.states` to get a list of states\n`.state {state}` to get cases in that particular state\n`.india` to get nationwide cases\n`.vaccine {pincode} {date}` to get vaccination slots near you. If `date` is not mentioned, will take today's date\n`.beds {type of hospital}` to get available beds. Type can be `government/govt` or `private`\n`.alerts {channel name}`(only for members with \"Manage Server\" permissions) to register any channel on your server to get important alerts from the developers\n`.invite` to get the invite link of the bot"
-        embed.add_field(name='Commands', value=commands, inline=False)
-        await ctx.send(embed=embed)
+        help_embed = discord.Embed(color=discord.Color.green())
+        help_embed.add_field(name='`.india`', value='Get COVID-19 stats of the entire nation', inline=False)
+        help_embed.add_field(name='`.states`', value='Get a list of states', inline=False)
+        help_embed.add_field(name='`.state {state}`', value='Get cases in that particular state', inline=False)
+        help_embed.add_field(name='`.vaccine {pincode} [date]`', value='Get vaccination slots near you. If `date` is not mentioned, it will take today\'s date', inline=False)
+        help_embed.add_field(name='`.beds {type of hospital}`', value='Get available beds. Type can be `government/govt` or `private`(Only Bengaluru)', inline=False)
+        help_embed.add_field(name='`.alerts {channel name}`', value='(only for members with \"Manage Server\" permissions) To register any channel on your server to get important alerts from the developers', inline=False)
+        help_embed.add_field(name='`.removealerts`', value='(only for members with \"Manage Server\" permissions) To de-register any channel that was registered for alerts', inline=False)
+        help_embed.add_field(name='`.invite`', value='Get the invite link of the bot', inline=False)
+        help_embed.add_field(name='`.contribute`', value='If you wish to contribute or learn about the bot', inline=False)
+        help_embed.add_field(name='`.reachout`', value='(only for Server Administrators) To reach out to the bot developers', inline=False)
+        await ctx.send(embed=help_embed)
     else:
         embed = discord.Embed(title='help', color=discord.Color.green(
         ), description='`.help` does not take any arguments.\n**Syntax:** `.help`')
@@ -212,9 +222,18 @@ async def help_command(ctx, text=''):
 @slash.slash(name="help", description="Commands available from me")
 async def help_slash(ctx):
     await ctx.defer()
-    help_embed = discord.Embed(color=discord.Color.green())
-    commands = "`.states` to get a list of states\n`.state {state}` to get cases in that particular state\n`.india` to get nationwide cases\n`.vaccine {pincode} {date}` to get vaccination slots near you. If `date` is not mentioned, will take today's date\n`.beds {type of hospital}` to get available beds. Type can be `government/govt` or `private`(Only Bengaluru)"
-    help_embed.add_field(name='Commands', value=commands, inline=False)
+    help_embed = discord.Embed(title="Help", color=discord.Color.green())
+    help_embed.add_field(name='`.india`', value='Get COVID-19 stats of the entire nation', inline=False)
+    help_embed.add_field(name='`.states`', value='Get a list of states', inline=False)
+    help_embed.add_field(name='`.state {state}`', value='Get cases in that particular state', inline=False)
+    help_embed.add_field(name='`.vaccine {pincode} [date]`', value='Get vaccination slots near you. If `date` is not mentioned, it will take today\'s date', inline=False)
+    help_embed.add_field(name='`.beds {type of hospital}`', value='Get available beds. Type can be `government/govt` or `private`(Only Bengaluru)', inline=False)
+    help_embed.add_field(name='`.alerts {channel name}`', value='(only for members with \"Manage Server\" permissions) To register any channel on your server to get important alerts from the developers', inline=False)
+    help_embed.add_field(name='`.removealerts`', value='(only for members with \"Manage Server\" permissions) To de-register any channel that was registered for alerts', inline=False)
+    help_embed.add_field(name='`.invite`', value='Get the invite link of the bot', inline=False)
+    help_embed.add_field(name='`.contribute`', value='If you wish to contribute or learn about the bot', inline=False)
+    help_embed.add_field(name='`.reachout`', value='(only for Server Administrators) To reach out to the bot developers', inline=False)
+    # help_embed.add_field(name='`.`', value='', inline=False)
     await ctx.send(embeds=[help_embed])
 
 
@@ -317,8 +336,8 @@ async def india_slash(ctx):
     await ctx.send(embeds=[embed])
 
 
-@client.command()
-async def states(ctx, text=''):
+@client.command(aliases=['states'])
+async def states_command(ctx, text=''):
     global s
     if text != '':
         await ctx.send('Wrong usage of command, check `.help`')
@@ -528,7 +547,7 @@ async def update():
     print("df Updated at: ", datetime.datetime.now())
 
 
-@tasks.loop(seconds=120)
+@tasks.loop(seconds=60)
 async def alert():
     date = datetime.datetime.now().strftime("%d-%m-%Y")
     datetom = (datetime.datetime.now() +
@@ -582,24 +601,64 @@ async def alerts_command(ctx, dest: discord.TextChannel = None):
         pass
     auth_perms = ctx.channel.permissions_for(ctx.author)
     if(auth_perms.manage_guild):
+        file1 = open('guilds.txt', 'r')
+        for line in file1:
+            if(str(dest.id) in str(line.split(',')[1].rstrip('\n'))):
+                await ctx.send(f"Looks like {dest.mention} is already subscribed to our alerts")
+                file1.close()
+                return
         client_member = ctx.guild.get_member(836578128305717279)
         client_perms = client_member.permissions_in(dest)
         if(client_perms.send_messages and client_perms.embed_links):
             file1 = open('guilds.txt', 'a')
             file1.write(f"{ctx.guild.id},{dest.id}\n")
             file1.close()
-            await ctx.send(f"**Success!** You'll now get vaccine slot alerts and other important notifications from the bot on {dest.mention}")
+            await ctx.send(f"**Success!** You'll now get vaccine slot alerts in Bengaluru and other important notifications from the bot on {dest.mention}")
         else:
             await ctx.send("I don't have enough permissions in that channel. Enable `Send Messages` and `Embed Links` for me")
     else:
         await ctx.send("Looks like you don't have the manage server permissions to run this")
 
 
+@client.command(aliases=['removealerts'])
+async def removealerts_command(ctx, dest:discord.TextChannel = None):
+    found = False
+    if(dest == None):
+        await ctx.send("Mention the channel you want to remove the alerts from")
+        return
+    auth_perms = ctx.channel.permissions_for(ctx.author)
+    if(auth_perms.manage_guild):
+        fp = open('guilds.txt', 'r')
+        for line1 in fp:
+            if(str(dest.id) in str(line1.split(',')[1].rstrip('\n'))):
+                fp.close()
+                found = True
+                break
+            else:
+                continue
+        if(not found):
+            await ctx.send(f"Looks like {dest.mention} was never set up for alerts")
+            fp.close()
+            return
+        dat = ''
+        fp = open('guilds.txt', 'r')
+        for line1 in fp:
+            if(str(dest.id) not in str(line1.split(',')[1].rstrip('\n'))):
+                dat += line1
+        fp.close()
+        fp = open('guilds.txt', 'w')
+        fp.write(dat)
+        fp.close()
+        await ctx.send(f"**DONE**. {dest.mention} will no longer receive alerts and updates from the developers")
+    else:
+        await ctx.send("Looks like you don't have the manage server permissions to run this")
+            
+
 @client.command(aliases=['announce'])
 async def announce_command(ctx, msg: str = ''):
     if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872)):
         if(msg == ''):
-            await ctx.send("Get a message man")
+            await ctx.send("Put a message man")
             return
         else:
             pass
@@ -610,6 +669,40 @@ async def announce_command(ctx, msg: str = ''):
             await client.get_channel(int(ch)).send(f"**NEW ALERT FROM THE DEVS**\n\n{msg}")
     else:
         await ctx.send("You don't have permission to execute this command")
+
+
+@client.command(aliases=['reachout'])
+async def reachout_command(ctx, msg: str = ''):
+    if(msg == ''):
+        await ctx.send("Type a message to send to the developers")
+        return
+    auth_perms = ctx.channel.permissions_for(ctx.author)
+    if(auth_perms.administrator):
+        await ctx.send("Your message has been sent to the devs. We will get back to you with a reply shortly on this channel")
+        await client.get_channel(841560857602162698).send(f"Reachout from `{ctx.guild.name}`, ID: `{ctx.guild.id}`, channel-ID: `{ctx.channel.id}`\n\n{msg}")
+    else:
+        await ctx.send("Only members with administrator perms can run this command. Contact your server admin or anyone with a role who has administrator privileges. You can always contact us on `covidindiabot@gmail.com`")
+
+
+@client.command(aliases=['reachreply'])
+async def reachreply_command(ctx, destid: int = 0, msg: str = ''):
+    if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872)):
+        if(destid == 0):
+            await ctx.send("Saar, enter channel ID")
+            return
+        if(msg == ''):
+            await ctx.send("Saar, tell something to reply to them")
+            return
+        try:
+            dest = client.get_channel(destid)
+        except:
+            await ctx.send("Can't fetch that channel")
+            return
+        await dest.send("**MESSAGE FROM THE DEVS**")
+        await dest.send(msg)
+        await ctx.send("Message sent")
+    else:
+        await ctx.send("You do not have the permission to execute this command")
 
 
 # Runs the bot
