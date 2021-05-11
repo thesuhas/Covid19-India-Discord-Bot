@@ -126,8 +126,8 @@ async def on_message(message):
             await message.publish()
         else:
             pass
-    elif client.user.mentioned_in(message):
-        await message.channel.send(f"{message.author.mention} my prefix in this server is `.`. Use `.help` to know what all I can do")
+    elif '<@!836578128305717279>' in message.content:
+        await message.channel.send(f"{message.author.mention} my prefix in this server is `.`\nUse `.help` to know what all I can do")
     else:
         await client.process_commands(message)
 
@@ -583,9 +583,12 @@ async def alert():
                             embed.add_field(
                                 name='Fee type', value=k['fee_type'], inline=False)
                             embed.add_field(name="Slots", value='\n'.join(
-                                k['slots']), inline=False)
-                            await client.get_channel(840644400564142111).send(embed=embed)
-                            # await client.get_channel(838492835056713728).send(embed=embed)
+                                k['slots']), inline=False)            
+                            fp = open('alerts.csv', 'r')
+                            ch_list = [line.split(',')[1] for line in list(filter(None, fp.read().split('\n')))]
+                            for ch in ch_list:
+                                await client.get_channel(int(ch)).send(embed=embed)
+                            fp.close()
                     else:
                         continue
             else:
@@ -597,8 +600,6 @@ async def alerts_command(ctx, dest: discord.TextChannel = None):
     if(dest == None):
         await ctx.send("Mention the channel you want to send alerts to")
         return
-    else:
-        pass
     auth_perms = ctx.channel.permissions_for(ctx.author)
     if(auth_perms.manage_guild):
         file1 = open('alerts.csv', 'r')
@@ -655,18 +656,18 @@ async def removealerts_command(ctx, dest:discord.TextChannel = None):
             
 
 @client.command(aliases=['announce'])
-async def announce_command(ctx, msg: str = ''):
+async def announce_command(ctx, *, msg: str = ''):
     if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872)):
         if(msg == ''):
             await ctx.send("Put a message man")
             return
-        else:
-            pass
         fp = open('alerts.csv', 'r')
         ch_list = [line.split(',')[1] for line in list(
             filter(None, fp.read().split('\n')))]
         for ch in ch_list:
             await client.get_channel(int(ch)).send(f"**NEW ALERT FROM THE DEVS**\n\n{msg}")
+        await ctx.send("Announcement sent")
+        fp.close()
     else:
         await ctx.send("You don't have permission to execute this command")
 
@@ -679,13 +680,13 @@ async def reachout_command(ctx, *, msg: str = ''):
     auth_perms = ctx.channel.permissions_for(ctx.author)
     if(auth_perms.administrator):
         await ctx.send("Your message has been sent to the devs. We will get back to you with a reply shortly on this channel")
-        await client.get_channel(841560857602162698).send(f"Reachout from `{ctx.guild.name}`, ID: `{ctx.guild.id}`, channel-ID: `{ctx.channel.id}`\n\n{msg}")
+        await client.get_channel(841560857602162698).send(f"Reachout from `{ctx.guild.name}`, guild-ID: `{ctx.guild.id}`, channel-ID: `{ctx.channel.id}`\n\n{msg}")
     else:
         await ctx.send("Only members with administrator perms can run this command. Contact your server admin or anyone with a role who has administrator privileges. You can always contact us on `covidindiabot@gmail.com`")
 
 
 @client.command(aliases=['reachreply'])
-async def reachreply_command(ctx, destid: int = 0, msg: str = ''):
+async def reachreply_command(ctx, destid: int = 0, *, msg: str = ''):
     if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872)):
         if(destid == 0):
             await ctx.send("Saar, enter channel ID")
