@@ -109,12 +109,12 @@ async def on_guild_join(guild):
 @client.event
 async def on_guild_remove(guild):
     dat = ''
-    fp = open('guilds.txt', 'r')
+    fp = open('alerts.csv', 'r')
     for line1 in fp:
         if(str(guild.id) not in line1.split(',')):
             dat += line1
     fp.close()
-    fp = open('guilds.txt', 'w')
+    fp = open('alerts.csv', 'w')
     fp.write(dat)
     fp.close()
 
@@ -136,8 +136,8 @@ async def on_message(message):
 async def file_command(ctx):
     if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872)):
         await ctx.send("You have clearance")
-        with open('guilds.txt', 'r') as fp:
-            await client.get_channel(841561036305465344).send(file=discord.File(fp, 'guilds.txt'))
+        with open('alerts.csv', 'r') as fp:
+            await client.get_channel(841561036305465344).send(file=discord.File(fp, 'alerts.csv'))
         fp.close()
     else:
         await ctx.send("You are not authorrised to run this command")
@@ -601,7 +601,7 @@ async def alerts_command(ctx, dest: discord.TextChannel = None):
         pass
     auth_perms = ctx.channel.permissions_for(ctx.author)
     if(auth_perms.manage_guild):
-        file1 = open('guilds.txt', 'r')
+        file1 = open('alerts.csv', 'r')
         for line in file1:
             if(str(dest.id) in str(line.split(',')[1].rstrip('\n'))):
                 await ctx.send(f"Looks like {dest.mention} is already subscribed to our alerts")
@@ -610,7 +610,7 @@ async def alerts_command(ctx, dest: discord.TextChannel = None):
         client_member = ctx.guild.get_member(836578128305717279)
         client_perms = client_member.permissions_in(dest)
         if(client_perms.send_messages and client_perms.embed_links):
-            file1 = open('guilds.txt', 'a')
+            file1 = open('alerts.csv', 'a')
             file1.write(f"{ctx.guild.id},{dest.id}\n")
             file1.close()
             await ctx.send(f"**Success!** You'll now get vaccine slot alerts in Bengaluru and other important notifications from the bot on {dest.mention}")
@@ -628,7 +628,7 @@ async def removealerts_command(ctx, dest:discord.TextChannel = None):
         return
     auth_perms = ctx.channel.permissions_for(ctx.author)
     if(auth_perms.manage_guild):
-        fp = open('guilds.txt', 'r')
+        fp = open('alerts.csv', 'r')
         for line1 in fp:
             if(str(dest.id) in str(line1.split(',')[1].rstrip('\n'))):
                 fp.close()
@@ -641,12 +641,12 @@ async def removealerts_command(ctx, dest:discord.TextChannel = None):
             fp.close()
             return
         dat = ''
-        fp = open('guilds.txt', 'r')
+        fp = open('alerts.csv', 'r')
         for line1 in fp:
             if(str(dest.id) not in str(line1.split(',')[1].rstrip('\n'))):
                 dat += line1
         fp.close()
-        fp = open('guilds.txt', 'w')
+        fp = open('alerts.csv', 'w')
         fp.write(dat)
         fp.close()
         await ctx.send(f"**DONE**. {dest.mention} will no longer receive alerts and updates from the developers")
@@ -662,7 +662,7 @@ async def announce_command(ctx, msg: str = ''):
             return
         else:
             pass
-        fp = open('guilds.txt', 'r')
+        fp = open('alerts.csv', 'r')
         ch_list = [line.split(',')[1] for line in list(
             filter(None, fp.read().split('\n')))]
         for ch in ch_list:
