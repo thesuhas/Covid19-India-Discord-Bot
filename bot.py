@@ -128,7 +128,7 @@ async def on_message(message):
             await message.publish()
         else:
             pass
-    elif '<@!836578128305717279>' in message.content:
+    elif (('<@!836578128305717279>' in message.content) or ('<@836578128305717279>' in message.content)):
         await message.channel.send(f"{message.author.mention} my prefix in this server is `.`\nUse `.help` to know what all I can do")
     else:
         await client.process_commands(message)
@@ -136,7 +136,7 @@ async def on_message(message):
 
 @client.command(aliases=['file', 'f'])
 async def file_command(ctx):
-    if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872)):
+    if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872) or (ctx.author.id == 771985293011058708)):
         await ctx.send("You have clearance")
         with open('alerts.csv', 'r') as fp:
             await client.get_channel(841561036305465344).send(file=discord.File(fp, 'alerts.csv'))
@@ -147,7 +147,7 @@ async def file_command(ctx):
 
 @client.command(aliases=['guilds'])
 async def guilds_command(ctx):
-    if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872)):
+    if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872) or (ctx.author.id == 771985293011058708)):
         await ctx.channel.trigger_typing()
         dat = 'SERVER NAME,SERVER ID\n\n'
         guilds_details = await client.fetch_guilds(limit=150).flatten()
@@ -174,19 +174,21 @@ async def _support(ctx, *params):
         1: "Fork this repository",
         2: "Create a new branch called `beta-username`",
         3: "Do whatever changes you wish to do and create a pull request with the following information furnished in the request message: `The functionality you wish to change/add | What did you change/add`",
-        4: "Send a review request to any of the following members: `thesuhas`, `RIT3shSapata`, `sach-12` and/or `ArvindAROO`.",
+        4: "Send a review request to any of the following members: `thesuhas`, `RIT3shSapata`, `sach-12`, `ArvindAROO` and/or `rohangrge`",
         5: "Wait for approval for reviewers. Your PR may be directly accepted or requested for further changes."
     }
     for ruleNo in rules:
         Embeds.add_field(name='\u200b', value="`" +
                          str(ruleNo) + '`: ' + rules[ruleNo], inline=False)
 
-    stark = ctx.guild.get_member(718845827413442692).mention
-    sapota = ctx.guild.get_member(404597472103759872).mention
-    suhas = ctx.guild.get_member(554876169363652620).mention
-    sach = ctx.guild.get_member(723377619420184668).mention
-    Embeds.add_field(name="Reviewers", value="`thesuhas` - {}\n`ArvindAROO` - {}\n `RIT3shSapata` - {} and\n `sach-12` - {}".format(
-        suhas, stark, sapota, sach), inline=False)
+    guildObj = client.get_guild(742797665301168220)
+    stark = guildObj.get_member(718845827413442692).mention
+    sapota = guildObj.get_member(404597472103759872).mention
+    suhas = guildObj.get_member(554876169363652620).mention
+    sach = guildObj.get_member(723377619420184668).mention
+    rohan = guildObj.get_member(771985293011058708).mention
+    Embeds.add_field(name="Reviewers", value="`thesuhas` - {}\n`ArvindAROO` - {}\n`RIT3shSapata` - {}\n`sach-12` - {} and\n`rohangrge` - {}".format(
+        suhas, stark, sapota, sach, rohan), inline=False)
     Embeds.add_field(
         name="Important", value="**Under no circumstances is anyone allowed to merge to the main branch.**", inline=False)
     Embeds.add_field(
@@ -690,7 +692,7 @@ async def removealerts_command(ctx, dest: discord.TextChannel = None):
 
 @client.command(aliases=['announce'])
 async def announce_command(ctx, *, msg: str = ''):
-    if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872)):
+    if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872) or (ctx.author.id == 771985293011058708)):
         if(msg == ''):
             await ctx.send("Put a message man")
             return
@@ -720,7 +722,7 @@ async def reachout_command(ctx, *, msg: str = ''):
 
 @client.command(aliases=['reachreply'])
 async def reachreply_command(ctx, destid: int = 0, *, msg: str = ''):
-    if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872)):
+    if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872) or (ctx.author.id == 771985293011058708)):
         if(destid == 0):
             await ctx.send("Saar, enter channel ID")
             return
