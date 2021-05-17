@@ -4,3 +4,5 @@ web_scrape.py
 test.png
 guilds.csv
 guilds.txt
+/.vscode
+*.csv

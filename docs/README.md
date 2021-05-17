@@ -28,7 +28,7 @@ If you wish to contribute to the bot, run these steps:
 
 3. Do whatever changes you wish to do and create a pull request with the following information furnished in the request message: `The functionality you wish to change/add | What did you change/add`
 
-4. Send a review request to any of the following members: `thesuhas`, `RIT3shSapata`, `sach-12` and/or `ArvindAROO`.
+4. Send a review request to any of the following members: `thesuhas`, `RIT3shSapata`, `sach-12`, `ArvindAROO` and/or `rohangrge`.
 
 5. Wait for approval for reviewers. Your PR may be directly accepted or requested for further changes.
 
