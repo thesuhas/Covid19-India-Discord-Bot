@@ -6,3 +6,5 @@ guilds.csv
 guilds.txt
 /.vscode
 *.csv
+nohup.out
+.env.save
