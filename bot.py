@@ -400,7 +400,7 @@ async def vaccine_command(ctx, pincode="", date=datetime.datetime.now().strftime
                 # Look at all sessions
                 for j in i['sessions']:
                     # If there is an available session
-                    if j['available_capacity'] >= 1:
+                    if j['available_capacity_dose1'] >= 1:
                         # Check if hospital exists
                         if i['name'] in sessions:
                             sessions[i['name']].append(j)
@@ -455,7 +455,7 @@ async def vaccine_slash(ctx, pincode="", date=datetime.datetime.now().strftime("
                 # Look at all sessions
                 for j in i['sessions']:
                     # If there is an available session
-                    if j['available_capacity'] >= 1:
+                    if j['available_capacity_dose1'] >= 1:
                         # Check if hospital exists
                         if i['name'] in sessions:
                             sessions[i['name']].append(j)
@@ -601,7 +601,7 @@ async def alert():
                 resp = res.json()
                 for k in resp['sessions']:
                     if(len(k) != 0):
-                        if(math.trunc(k['available_capacity']) >= 8 and k['min_age_limit'] == 18 and ((k['available_capacity'])-int(k['available_capacity'])) == 0):
+                        if(math.trunc(k['available_capacity_dose1']) >= 8 and k['min_age_limit'] == 18 and ((k['available_capacity_dose1'])-int(k['available_capacity_dose1'])) == 0):
                             embed = discord.Embed(
                                 title=f"Vaccine Available at {k['name']}", color=discord.Color.green())
                             embed.add_field(
@@ -621,8 +621,9 @@ async def alert():
                             fp = open('alerts.csv', 'r')
                             ch_list = [line.split(',')[1] for line in list(
                                 filter(None, fp.read().split('\n')))]
-                            for ch in ch_list:
-                                await client.get_channel(int(ch)).send(embed=embed)
+                            #for ch in ch_list:
+                             #   await client.get_channel(int(ch)).send(embed=embed)
+                            await client.get_channel(841561036305465344).send(embed=embed)
                             fp.close()
                     else:
                         continue
