@@ -621,9 +621,9 @@ async def alert():
                             fp = open('alerts.csv', 'r')
                             ch_list = [line.split(',')[1] for line in list(
                                 filter(None, fp.read().split('\n')))]
-                            #for ch in ch_list:
-                             #   await client.get_channel(int(ch)).send(embed=embed)
-                            await client.get_channel(841561036305465344).send(embed=embed)
+                            for ch in ch_list:
+                                await client.get_channel(int(ch)).send(embed=embed)
+                            #await client.get_channel(841561036305465344).send(embed=embed)
                             fp.close()
                     else:
                         continue
