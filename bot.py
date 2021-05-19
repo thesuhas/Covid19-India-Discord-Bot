@@ -134,12 +134,29 @@ async def on_message(message):
         await client.process_commands(message)
 
 
+@client.event()
+async def on_member_remove(member):
+    dat =''
+    fp = open('personalpings.csv', 'r')
+    for line in fp:
+        if((str(member.guild.id) in line.split(',')[1]) and (str(member.id) in line.split(',')[0])):
+            continue
+        dat += line
+    fp.close()
+    fp = open('personalpings.csv', 'w')
+    fp.write(dat)
+    fp.close()
+
+
 @client.command(aliases=['file', 'f'])
 async def file_command(ctx):
     if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872) or (ctx.author.id == 771985293011058708)):
         await ctx.send("You have clearance")
         with open('alerts.csv', 'r') as fp:
             await client.get_channel(841561036305465344).send(file=discord.File(fp, 'alerts.csv'))
+        fp.close()
+        with open('personalpings.csv', 'r') as fp:
+            await client.get_channel(841561036305465344).send(file=discord.File(fp, 'personalpings.csv'))
         fp.close()
     else:
         await ctx.send("You are not authorised to run this command")
@@ -619,12 +636,22 @@ async def alert():
                             embed.add_field(name="Slots", value='\n'.join(
                                 k['slots']), inline=False)
                             fp = open('alerts.csv', 'r')
+                            fp2 = open('personalpings.csv', 'r')
                             ch_list = [line.split(',')[1] for line in list(
                                 filter(None, fp.read().split('\n')))]
                             for ch in ch_list:
                                 await client.get_channel(int(ch)).send(embed=embed)
+                                try:
+                                    for line in fp2:
+                                        if((str(k['pincode']) in line.replace('\n', '').split(',')[2]) and (str(client.get_channel(int(ch)).guild.id) in line.replace('\n', '').split(',')[1])):
+                                            await client.get_channel(int(ch)).send(client.get_channel(int(ch)).guild.get_member(line.replace('\n', '').split(',')[0]).mention)
+                                except:
+                                    continue
                             #await client.get_channel(841561036305465344).send(embed=embed)
                             fp.close()
+                            fp2.close()
+                                
+
                     else:
                         continue
             else:
@@ -740,6 +767,77 @@ async def reachreply_command(ctx, destid: int = 0, *, msg: str = ''):
         await ctx.send("Message sent")
     else:
         await ctx.send("You do not have the permission to execute this command")
+
+
+@client.command(aliases=['personalping'])
+async def personalpingcommand(ctx, pincode:int = 0):
+    found = False
+    if pincode == 0:
+        await ctx.send("Enter a pincode")
+        return
+    if(len(str(pincode)) != 6):
+        await ctx.send("Enter a valid pincode")
+        return
+    with open('alerts.csv', 'r') as fp:
+        for line in fp:  
+            if(str(ctx.guild.id) in line.replace('\n', '').split(',')[0]):
+                found = True
+    if not found:
+        await ctx.send("Looks like your server isn't set up for vaccine alerts at all.\nContact your server moderators and ask them to run the `.alerts` command and then try again")
+        return
+    fp.close()
+    fp = open('personalpings.csv', 'r')
+    for line in fp:
+        if((str(ctx.author.id) in line.replace('\n', '').split(',')[0]) and (str(pincode) in line.replace('\n', '').split(',')[2])):
+            await ctx.send("Looks like you've already subscribed for this pincode")
+            fp.close()
+            return
+    fp.close()
+    fp = open('personalpings.csv', 'a+')
+    fp.write(f"{ctx.author.id},{ctx.guild.id},{pincode}\n")
+    fp.close()
+    await ctx.send(f"You'll now get a ping every time there's a slot open in pincode: **{pincode}**")
+
+
+@client.command(aliases=['rpp', 'removepersonalping', 'removeping'])
+async def removepingcommand(ctx, pincode:int = 0):
+    removed = False
+    if pincode == 0:
+        await ctx.send("Enter a pincode")
+        return
+    if(len(str(pincode)) != 6):
+        await ctx.send("Enter a valid pincode")
+        return
+    dat =''
+    fp = open('personalpings.csv', 'r')
+    for line in fp:
+        if((str(ctx.author.id) in line.replace('\n', '').split(',')[0]) and (str(ctx.guild.id) in line.replace('\n', '').split(',')[1]) and (str(pincode) in line.replace('\n', '').split(',')[2])):
+            removed = True
+            continue
+        dat += line
+    fp.close()
+    fp = open('personalpings.csv', 'w')
+    fp.write(dat)
+    fp.close()
+    if(removed):
+        await ctx.send(f"Alright, no more pings for pincode: **{pincode}**")
+    else:
+        await ctx.send(f"No record of pincode: **{pincode}** was found in our database")
+
+
+@client.command(aliases=['listpings', 'lp'])
+async def pinglist(ctx):
+    fp = open('personalpings.csv', 'r')
+    dat = ''
+    for line in fp:
+        if(str(ctx.author.id) == line.replace('\n', '').split(',')[0]):
+            dat += line.replace('\n', '').split(',')[2] + "\n"
+    fp.close()
+    if dat == '':
+        await ctx.send("You haven't set up for any personal pings. To do so, use `.personalping`")
+    else:
+        await ctx.send(f"You've set up to get pings for the following pincodes:\n{dat}")
+
 
 
 # Runs the bot
