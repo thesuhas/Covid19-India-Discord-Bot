@@ -134,7 +134,7 @@ async def on_message(message):
         await client.process_commands(message)
 
 
-@client.event()
+@client.event
 async def on_member_remove(member):
     dat =''
     fp = open('personalpings.csv', 'r')
