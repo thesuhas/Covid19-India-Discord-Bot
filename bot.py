@@ -645,7 +645,8 @@ async def alert():
                                     for line in fp2:
                                         if((str(k['pincode']) in line.replace('\n', '').split(',')[2]) and (str(client.get_channel(int(ch)).guild.id) in line.replace('\n', '').split(',')[1])):
                                             await client.get_channel(int(ch)).send(client.get_channel(int(ch)).guild.get_member(line.replace('\n', '').split(',')[0]).mention)
-                                except:
+                                except Exception as e:
+                                    await client.get_channel(841561036305465344).send(e)
                                     continue
                             #await client.get_channel(841561036305465344).send(embed=embed)
                             fp.close()
