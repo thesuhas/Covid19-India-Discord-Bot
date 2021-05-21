@@ -637,13 +637,17 @@ async def alert():
                                 k['slots']), inline=False)
                             fp = open('alerts.csv', 'r')
                             fp2 = open('personalpings.csv', 'r')
+                            await client.get_channel(841561036305465344).send("i opened file")
                             ch_list = [line.split(',')[1] for line in list(
                                 filter(None, fp.read().split('\n')))]
                             for ch in ch_list:
                                 await client.get_channel(int(ch)).send(embed=embed)
                                 try:
+                                    await client.get_channel(841561036305465344).send("i came into try block")
                                     for line in fp2:
+                                        await client.get_channel(841561036305465344).send("i came into for loop")
                                         if((str(k['pincode']) in line.replace('\n', '').split(',')[2]) and (str(client.get_channel(int(ch)).guild.id) in line.replace('\n', '').split(',')[1])):
+                                            await client.get_channel(841561036305465344).send("i came into the if block")
                                             await client.get_channel(int(ch)).send(client.get_channel(int(ch)).guild.get_member(line.replace('\n', '').split(',')[0]).mention)
                                 except Exception as e:
                                     await client.get_channel(841561036305465344).send(e)
