@@ -612,8 +612,8 @@ async def alert():
             else:
                 res = requests.get(url, params=data)
             #resp = res.json()
-            # print(res.json())
-            # print(res.status_code)
+            #print(res.json())
+            #print(res.status_code, j)
             if(res.status_code == 200):
                 resp = res.json()
                 for k in resp['sessions']:
