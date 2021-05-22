@@ -75,8 +75,9 @@ async def on_ready():
     t = datetime.datetime.now() - datetime.timedelta(days=1)
     t = t.strftime("%d-%b-%y")
     df_daily = df1[df1['Date'] == t]
-    df_daily.to_csv(file_daily)
-    print("df_daily Updated at: ", datetime.datetime.now())
+    if len(df_daily) > 0:
+        df_daily.to_csv(file_daily)
+        print("df_daily Updated at: ", datetime.datetime.now())
 
     activity = discord.Activity(
         name="Plague Inc.", type=discord.ActivityType.playing)
@@ -503,7 +504,7 @@ async def vaccine_slash(ctx, pincode="", date=datetime.datetime.now().strftime("
             await ctx.send("No available vaccination center")
 
 
-@tasks.loop(seconds=86400)
+@tasks.loop(seconds=1800)
 async def update_daily():
     global df_daily
     # Creating daily df
@@ -516,8 +517,9 @@ async def update_daily():
     t = datetime.datetime.now() - datetime.timedelta(days=1)
     t = t.strftime("%d-%b-%y")
     df_daily = df1[df1['Date'] == t]
-    df_daily.to_csv(file_daily)
-    print("df_daily Updated at: ", datetime.datetime.now())
+    if len(df_daily) > 0:
+        df_daily.to_csv(file_daily)
+        print("df_daily Updated at: ", datetime.datetime.now())
 
 
 @client.command(aliases=['beds'])
