@@ -166,16 +166,19 @@ async def file_command(ctx):
 async def guilds_command(ctx):
     if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872) or (ctx.author.id == 771985293011058708)):
         await ctx.channel.trigger_typing()
+        count = 0
         dat = 'SERVER NAME,SERVER ID\n\n'
         guilds_details = await client.fetch_guilds(limit=150).flatten()
         for guild_deets in guilds_details:
             dat += f"{guild_deets.name},{guild_deets.id}\n"
-        with open('temp.csv', 'w+') as fp:
+            count += 1
+        dat += f"\nCOUNT: {count}"
+        with open('guilds.csv', 'w+') as fp:
             fp.write(dat)
         await ctx.send("You have clearance")
-        await client.get_channel(841561036305465344).send(file=discord.File('temp.csv'))
+        await client.get_channel(841561036305465344).send(file=discord.File('guilds.csv'))
         fp.close()
-        os.remove('temp.csv')
+        os.remove('guilds.csv')
     else:
         await ctx.send("You are not authorised for this")
 
