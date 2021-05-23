@@ -33,6 +33,9 @@ mapp = {"total": 'TT', 'andaman and nicobar islands': 'AN', "andhra pradesh": 'A
 df = 0
 df_daily = 0
 
+# Update variable
+footer = 0
+
 # Initialising states list
 s = list()
 
@@ -45,6 +48,7 @@ async def on_ready():
     global df
     global df_daily
     global s
+    global footer
     # Start updation loop
     update.start()
     update_daily.start()
@@ -64,6 +68,9 @@ async def on_ready():
     df["State"] = df["State"].str.lower()
     df.to_csv(filename)
     print("df Updated at: ", datetime.datetime.now())
+    time = datetime.datetime.now() + datetime.timedelta(hours=5, minutes=30)
+    time = time.strftime("%d-%b") + ' at ' + time.strftime("%I:%M %p")
+    footer = f"Last Updated: {time}"
 
     # Creating daily df
     response = requests.get(
@@ -75,8 +82,9 @@ async def on_ready():
     t = datetime.datetime.now() - datetime.timedelta(days=1)
     t = t.strftime("%d-%b-%y")
     df_daily = df1[df1['Date'] == t]
-    df_daily.to_csv(file_daily)
-    print("df_daily Updated at: ", datetime.datetime.now())
+    if len(df_daily) > 0:
+        df_daily.to_csv(file_daily)
+        print("df_daily Updated at: ", datetime.datetime.now())
 
     activity = discord.Activity(
         name="Plague Inc.", type=discord.ActivityType.playing)
@@ -309,6 +317,7 @@ async def state_command(ctx, *, state=''):
                                 1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Recovered'][mapp[state]]), 'INR', locale='en_IN')[1:-3] + ')', inline=False)
                 embed.add_field(name='Deaths', value=format_currency(int(entry['Deaths'].values[0]), 'INR', locale='en_IN')[
                                 1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Deceased'][mapp[state]]), 'INR', locale='en_IN')[1:-3] + ')', inline=False)
+                embed.set_footer(text=footer)
                 await ctx.send(embed=embed)
 
 # Slash command of state
@@ -342,6 +351,7 @@ async def state_slash(ctx, *, state=''):
                                 1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Recovered'][mapp[state]]), 'INR', locale='en_IN')[1:-3] + ')', inline=False)
                 embed.add_field(name='Deaths', value=format_currency(int(entry['Deaths'].values[0]), 'INR', locale='en_IN')[
                                 1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Deceased'][mapp[state]]), 'INR', locale='en_IN')[1:-3] + ')', inline=False)
+                embed.set_footer(text=footer)
                 await ctx.send(embed=embed)
 
 
@@ -359,6 +369,7 @@ async def india_command(ctx):
                     1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Recovered'][mapp['total']]), 'INR', locale='en_IN')[1:-3] + ')', inline=False)
     embed.add_field(name='Deaths', value=format_currency(int(entry['Deaths'].values[0]), 'INR', locale='en_IN')[
                     1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Deceased'][mapp['total']]), 'INR', locale='en_IN')[1:-3] + ')', inline=False)
+    embed.set_footer(text=footer)
     await ctx.send(embed=embed)
 
 # Slash command of the above
@@ -378,6 +389,7 @@ async def india_slash(ctx):
                     1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Recovered'][mapp['total']]), 'INR', locale='en_IN')[1:-3] + ')', inline=False)
     embed.add_field(name='Deaths', value=format_currency(int(entry['Deaths'].values[0]), 'INR', locale='en_IN')[
                     1:-3] + '\n(+' + format_currency(int(df_daily[df_daily['Status'] == 'Deceased'][mapp['total']]), 'INR', locale='en_IN')[1:-3] + ')', inline=False)
+    embed.set_footer(text=footer)
     await ctx.send(embeds=[embed])
 
 
@@ -503,7 +515,7 @@ async def vaccine_slash(ctx, pincode="", date=datetime.datetime.now().strftime("
             await ctx.send("No available vaccination center")
 
 
-@tasks.loop(seconds=86400)
+@tasks.loop(seconds=1800)
 async def update_daily():
     global df_daily
     # Creating daily df
@@ -516,8 +528,9 @@ async def update_daily():
     t = datetime.datetime.now() - datetime.timedelta(days=1)
     t = t.strftime("%d-%b-%y")
     df_daily = df1[df1['Date'] == t]
-    df_daily.to_csv(file_daily)
-    print("df_daily Updated at: ", datetime.datetime.now())
+    if len(df_daily) > 0:
+        df_daily.to_csv(file_daily)
+        print("df_daily Updated at: ", datetime.datetime.now())
 
 
 @client.command(aliases=['beds'])
@@ -615,8 +628,8 @@ async def alert():
             else:
                 res = requests.get(url, params=data)
             #resp = res.json()
-            # print(res.json())
-            # print(res.status_code)
+            #print(res.json())
+            #print(res.status_code, j)
             if(res.status_code == 200):
                 resp = res.json()
                 for k in resp['sessions']:
