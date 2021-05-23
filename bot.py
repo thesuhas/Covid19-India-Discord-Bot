@@ -68,7 +68,8 @@ async def on_ready():
     df["State"] = df["State"].str.lower()
     df.to_csv(filename)
     print("df Updated at: ", datetime.datetime.now())
-    time = datetime.datetime.now().strftime("%d-%m-%y %H:%M:%S")
+    time = datetime.datetime.now() + datetime.timedelta(hours=5, minutes=30)
+    time = time.strftime("%d-%b") + ' at ' + time.strftime("%I:%M %p")
     footer = f"Last Updated: {time}"
 
     # Creating daily df
