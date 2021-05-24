@@ -13,6 +13,7 @@ import datetime
 import dataframe_image as dfi
 import math
 import csv
+import re
 
 # Create a bot instance and sets a command prefix
 client = commands.Bot(command_prefix='.', intents=discord.Intents.all())
@@ -482,17 +483,18 @@ async def vaccine_command(ctx, pincode="", date=datetime.datetime.now().strftime
 async def vaccine_slash(ctx, pincode="", date=datetime.datetime.now().strftime("%d-%m-%Y")):
     await ctx.defer()
     # If no pincode given
-    if pincode == "":
-        await ctx.send("No pincode mentioned")
+    pincheck = await pincodecheckindia(pincode)
+    if not pincheck:
+        await ctx.send("Invalid pincode, try again")
     else:
         headers = {"Accept-Language": "en-IN",
                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
         data = {"pincode": pincode, "date": date}
         res = requests.get(
             "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin", headers=headers, params=data)
-        if res.status_code == 400:
-            await ctx.send("Invalid pincode")
-            return
+        # if res.status_code == 400:
+        #     await ctx.send("Invalid pincode")
+        #     return
         if res.status_code == 403:
             await ctx.send("API is unresponsive at the time. Please try again after sometime")
             return
@@ -828,58 +830,66 @@ async def reachreply_command(ctx, destid: int = 0, *, msg: str = ''):
 @client.command(aliases=['myping', 'mp'])
 async def personalpingcommand(ctx, pincode:int = 0):
     found = False
-    if pincode == 0:
-        await ctx.send("Enter a pincode")
-        return
-    if(len(str(pincode)) != 6):
-        await ctx.send("Enter a valid pincode")
-        return
-    with open('alerts.csv', 'r') as fp:
-        for line in fp:  
-            if(str(ctx.guild.id) in line.replace('\n', '').split(',')[0]):
-                found = True
-    if not found:
-        await ctx.send("Looks like your server isn't set up for vaccine alerts at all.\nContact your server moderators and ask them to run the `.alerts` command and then try again")
-        return
-    fp.close()
-    fp = open('mypings.csv', 'r')
-    for line in fp:
-        if((str(ctx.author.id) in line.replace('\n', '').split(',')[0]) and (str(pincode) in line.replace('\n', '').split(',')[2])):
-            await ctx.send("Looks like you've already subscribed for this pincode")
-            fp.close()
+    # if pincode == 0:
+    #     await ctx.send("Enter a pincode")
+    #     return
+    # if(len(str(pincode)) != 6):
+    #     await ctx.send("Enter a valid pincode")
+    #     return
+    pincheck = await pincodecheckbangalore(str(pincode))
+    if pincheck:
+        with open('alerts.csv', 'r') as fp:
+            for line in fp:  
+                if(str(ctx.guild.id) in line.replace('\n', '').split(',')[0]):
+                    found = True
+        if not found:
+            await ctx.send("Looks like your server isn't set up for vaccine alerts at all.\nContact your server moderators and ask them to run the `.alerts` command and then try again")
             return
-    fp.close()
-    fp = open('mypings.csv', 'a+')
-    fp.write(f"{ctx.author.id},{ctx.guild.id},{pincode}\n")
-    fp.close()
-    await ctx.send(f"You'll now get a ping every time there's a slot open in pincode: **{pincode}**")
+        fp.close()
+        fp = open('mypings.csv', 'r')
+        for line in fp:
+            if((str(ctx.author.id) in line.replace('\n', '').split(',')[0]) and (str(pincode) in line.replace('\n', '').split(',')[2])):
+                await ctx.send("Looks like you've already subscribed for this pincode")
+                fp.close()
+                return
+        fp.close()
+        fp = open('mypings.csv', 'a+')
+        fp.write(f"{ctx.author.id},{ctx.guild.id},{pincode}\n")
+        fp.close()
+        await ctx.send(f"You'll now get a ping every time there's a slot open in pincode: **{pincode}**")
+    else:
+        await ctx.send("Pincode invalid,try again")
+
 
 
 @client.command(aliases=['rp', 'removeping'])
 async def removepingcommand(ctx, pincode:int = 0):
     removed = False
-    if pincode == 0:
-        await ctx.send("Enter a pincode")
-        return
-    if(len(str(pincode)) != 6):
-        await ctx.send("Enter a valid pincode")
-        return
-    dat =''
-    fp = open('mypings.csv', 'r')
-    for line in fp:
-        if((str(ctx.author.id) in line.replace('\n', '').split(',')[0]) and (str(ctx.guild.id) in line.replace('\n', '').split(',')[1]) and (str(pincode) in line.replace('\n', '').split(',')[2])):
-            removed = True
-            continue
-        dat += line
-    fp.close()
-    fp = open('mypings.csv', 'w')
-    fp.write(dat)
-    fp.close()
-    if(removed):
-        await ctx.send(f"Alright, no more pings for pincode: **{pincode}**")
+    # if pincode == 0:
+    #     await ctx.send("Enter a pincode")
+    #     return
+    # if(len(str(pincode)) != 6):
+    #     await ctx.send("Enter a valid pincode")
+        #return
+    pincheck = await pincodecheckbangalore(str(pincode))
+    if pincheck:
+        dat =''
+        fp = open('mypings.csv', 'r')
+        for line in fp:
+            if((str(ctx.author.id) in line.replace('\n', '').split(',')[0]) and (str(ctx.guild.id) in line.replace('\n', '').split(',')[1]) and (str(pincode) in line.replace('\n', '').split(',')[2])):
+                removed = True
+                continue
+            dat += line
+        fp.close()
+        fp = open('mypings.csv', 'w')
+        fp.write(dat)
+        fp.close()
+        if(removed):
+            await ctx.send(f"Alright, no more pings for pincode: **{pincode}**")
+        else:
+            await ctx.send(f"No record of pincode: **{pincode}** was found in our database")
     else:
-        await ctx.send(f"No record of pincode: **{pincode}** was found in our database")
-
+        await ctx.send("Pincode invalid,try again")
 
 @client.command(aliases=['listpings', 'lp'])
 async def pinglist(ctx):
@@ -894,6 +904,23 @@ async def pinglist(ctx):
     else:
         await ctx.send(f"You've set up to get pings for the following pincodes:\n{dat}")
 
+async def pincodecheckindia(pincode):
+    regex = "^[1-9]{1}[0-9]{2}\\s{0,1}[0-9]{3}$"
+    pin = re.compile(regex)
+    check = re.match(pin,pincode)
+    if check is not None:
+        return True
+    else:
+        return False
+
+async def pincodecheckbangalore(pincode):
+    regex = "^[5]{1}[6]{1}[02]{1}\\s{0,1}[0-2]{1}[0-9]{2}$"
+    pin = re.compile(regex)
+    check = re.match(pin,pincode)
+    if check is not None:
+        return True
+    else:
+        return False
 
 
 # Runs the bot
