@@ -590,6 +590,7 @@ async def beds_slash(ctx, hospital_type):
 
 @tasks.loop(seconds=1800)
 async def update():
+    global footer
     global df
     # Create basic data frame and store
     test = requests.get(
@@ -603,6 +604,9 @@ async def update():
     df.to_csv(filename)
     # Prints when df is last updated
     print("df Updated at: ", datetime.datetime.now())
+    time = datetime.datetime.now() + datetime.timedelta(hours=5, minutes=30)
+    time = time.strftime("%d-%b") + ' at ' + time.strftime("%I:%M %p")
+    footer = f"Last Updated: {time}"
 
 
 @tasks.loop(seconds=20)
