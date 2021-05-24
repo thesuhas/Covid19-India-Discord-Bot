@@ -32,13 +32,13 @@ mapp = {"total": 'TT', 'andaman and nicobar islands': 'AN', "andhra pradesh": 'A
 CHANNELLIST = []
 PINGLIST = []
 
-def updateFileValues():
+def readAlertsCSV():
     with open('alerts.csv', 'r') as f:
         for line in f.readlines():
             lineLst = line.split(',')
             CHANNELLIST.append([int(lineLst[0]), int(lineLst[1])])
         f.close()
-
+def readPingsCSV():
     with open('mypings.csv', 'r') as f:
         for line in f.readlines():
             lineLst = line.split(',')
@@ -61,7 +61,8 @@ slash = SlashCommand(client, sync_commands=True)
 
 @client.event
 async def on_ready():
-    updateFileValues()
+    readAlertsCSV()
+    readPingsCSV()
     global df
     global df_daily
     global s
@@ -155,7 +156,9 @@ async def on_guild_remove(guild):
     fp = open('mypings.csv', 'w')
     fp.write(dat)
     fp.close()
-    updateFileValues()
+    readAlertsCSV()
+    readPingsCSV()
+
 
 
 
@@ -752,7 +755,7 @@ async def alerts_command(ctx, dest: discord.TextChannel = None):
             file1.write(f"{ctx.guild.id},{dest.id}\n")
             file1.close()
             await ctx.send(f"**Success!** You'll now get vaccine slot alerts in Bengaluru and other important notifications from the bot on {dest.mention}")
-            updateFileValues()
+            readAlertsCSV()
         else:
             await ctx.send("I don't have enough permissions in that channel. Enable `Send Messages` and `Embed Links` for me")
     else:
@@ -789,7 +792,8 @@ async def removealerts_command(ctx, dest: discord.TextChannel = None):
         fp.write(dat)
         fp.close()
         await ctx.send(f"**DONE**. {dest.mention} will no longer receive alerts and updates from the developers")
-        updateFileValues()
+        readAlertsCSV()
+
     else:
         await ctx.send("Looks like you don't have the manage server permissions to run this")
 
@@ -873,7 +877,9 @@ async def personalpingcommand(ctx, pincode:int = 0):
         fp.write(f"{ctx.author.id},{ctx.guild.id},{pincode}\n")
         fp.close()
         await ctx.send(f"You'll now get a ping every time there's a slot open in pincode: **{pincode}**")
-        updateFileValues()
+        readAlertsCSV()
+        readPingsCSV()
+
     else:
         await ctx.send("Pincode invalid,try again")
 
