@@ -671,6 +671,8 @@ async def alert():
                             embed.add_field(
                                 name='Date', value=k['date'], inline=False)
                             embed.add_field(
+                                name='Address', value=k['address'], inline=False)
+                            embed.add_field(
                                 name='Pincode', value=k['pincode'], inline=False)
                             embed.add_field(
                                 name='Available Capacity for Dose 1', value=k['available_capacity_dose1'], inline=False)
