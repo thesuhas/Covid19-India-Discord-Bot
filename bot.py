@@ -13,7 +13,6 @@ import datetime
 import dataframe_image as dfi
 import math
 import csv
-import pprint
 
 # Create a bot instance and sets a command prefix
 client = commands.Bot(command_prefix='.', intents=discord.Intents.all())
@@ -439,15 +438,13 @@ async def vaccine_command(ctx, pincode="", date=datetime.datetime.now().strftime
         data = res.json()
         sessions = dict()
         if len(data['centers']) > 0:
-            #pprint.pprint(data)
             for i in data['centers']:
-
                 # Look at all sessions
                 for j in i['sessions']:
                     # If there is an available session
-                    if j['available_capacity_dose1'] >= 1:
+                    if j['available_capacity'] >= 1:
                         # Check if hospital exists
-                        if i['name'] in sessions:
+                        if (i['name'], i['pincode'], i['fee_type'], i['address']) in sessions:
                             sessions[(i['name'], i['pincode'], i['fee_type'], i['address'])].append(j)
                         else:
                             sessions[(i['name'], i['pincode'], i['fee_type'], i['address'])] = list()
@@ -509,7 +506,7 @@ async def vaccine_slash(ctx, pincode="", date=datetime.datetime.now().strftime("
                 # Look at all sessions
                 for j in i['sessions']:
                     # If there is an available session
-                    if j['available_capacity_dose1'] >= 1:
+                    if j['available_capacity'] >= 1:
                         # Check if hospital exists
                         if i['name'] in sessions:
                             sessions[(i['name'], i['pincode'], i['fee_type'], i['address'])].append(j)
