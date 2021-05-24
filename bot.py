@@ -439,31 +439,38 @@ async def vaccine_command(ctx, pincode="", date=datetime.datetime.now().strftime
         sessions = dict()
         if len(data['centers']) > 0:
             for i in data['centers']:
-
                 # Look at all sessions
                 for j in i['sessions']:
                     # If there is an available session
-                    if j['available_capacity_dose1'] >= 1:
+                    if j['available_capacity'] >= 1:
                         # Check if hospital exists
-                        if i['name'] in sessions:
-                            sessions[i['name']].append(j)
+                        if (i['name'], i['pincode'], i['fee_type'], i['address']) in sessions:
+                            sessions[(i['name'], i['pincode'], i['fee_type'], i['address'])].append(j)
                         else:
-                            sessions[i['name']] = list()
-                            sessions[i['name']].append(j)
+                            sessions[(i['name'], i['pincode'], i['fee_type'], i['address'])] = list()
+                            sessions[(i['name'], i['pincode'], i['fee_type'], i['address'])].append(j)
             if len(sessions) == 0:
                 await ctx.send("No available sessions")
             else:
                 # Create an embed for every session
                 for sesh in sessions:
                     embed = discord.Embed(
-                        title=f"Vaccine Available at {sesh}", color=discord.Color.green())
+                        title=f"Vaccine Available at {sesh[0]}", color=discord.Color.green())
                     embed.add_field(name='Date', value=date, inline=False)
                     embed.add_field(
-                        name='Available Capacity', value=sessions[sesh][0]['available_capacity'], inline=False)
+                            name='Address', value=sesh[3], inline=False)
+                    embed.add_field(
+                            name='Pin Code', value=sesh[1], inline=False)
+                    embed.add_field(
+                        name='Available Capacity for Dose 1', value=sessions[sesh][0]['available_capacity_dose1'], inline=False)
+                    embed.add_field(
+                        name='Available Capacity for Dose 2', value=sessions[sesh][0]['available_capacity_dose2'], inline=False)
                     embed.add_field(
                         name='Minimum Age', value=sessions[sesh][0]['min_age_limit'], inline=False)
                     embed.add_field(
                         name='Vaccine', value=sessions[sesh][0]['vaccine'])
+                    embed.add_field(
+                            name='Fee type', value=sesh[2], inline=False)
                     embed.add_field(name="Slots", value='\n'.join(
                         sessions[sesh][0]['slots']), inline=False)
                     await ctx.send(embed=embed)
@@ -493,32 +500,41 @@ async def vaccine_slash(ctx, pincode="", date=datetime.datetime.now().strftime("
         data = res.json()
         sessions = dict()
         if len(data['centers']) > 0:
+            #pprint.pprint(data)
             for i in data['centers']:
-                # print(i)
+
                 # Look at all sessions
                 for j in i['sessions']:
                     # If there is an available session
-                    if j['available_capacity_dose1'] >= 1:
+                    if j['available_capacity'] >= 1:
                         # Check if hospital exists
                         if i['name'] in sessions:
-                            sessions[i['name']].append(j)
+                            sessions[(i['name'], i['pincode'], i['fee_type'], i['address'])].append(j)
                         else:
-                            sessions[i['name']] = list()
-                            sessions[i['name']].append(j)
+                            sessions[(i['name'], i['pincode'], i['fee_type'], i['address'])] = list()
+                            sessions[(i['name'], i['pincode'], i['fee_type'], i['address'])].append(j)
             if len(sessions) == 0:
                 await ctx.send("No available sessions")
             else:
                 # Create an embed for every session
                 for sesh in sessions:
                     embed = discord.Embed(
-                        title=f"Vaccine Available at {sesh}", color=discord.Color.green())
+                        title=f"Vaccine Available at {sesh[0]}", color=discord.Color.green())
                     embed.add_field(name='Date', value=date, inline=False)
                     embed.add_field(
-                        name='Available Capacity', value=sessions[sesh][0]['available_capacity'], inline=False)
+                            name='Address', value=sesh[3], inline=False)
+                    embed.add_field(
+                            name='Pin Code', value=sesh[1], inline=False)
+                    embed.add_field(
+                        name='Available Capacity for Dose 1', value=sessions[sesh][0]['available_capacity_dose1'], inline=False)
+                    embed.add_field(
+                        name='Available Capacity for Dose 2', value=sessions[sesh][0]['available_capacity_dose2'], inline=False)
                     embed.add_field(
                         name='Minimum Age', value=sessions[sesh][0]['min_age_limit'], inline=False)
                     embed.add_field(
                         name='Vaccine', value=sessions[sesh][0]['vaccine'])
+                    embed.add_field(
+                            name='Fee type', value=sesh[2], inline=False)
                     embed.add_field(name="Slots", value='\n'.join(
                         sessions[sesh][0]['slots']), inline=False)
                     await ctx.send(embed=embed)
@@ -601,6 +617,7 @@ async def beds_slash(ctx, hospital_type):
 
 @tasks.loop(seconds=1800)
 async def update():
+    global footer
     global df
     # Create basic data frame and store
     test = requests.get(
@@ -614,6 +631,9 @@ async def update():
     df.to_csv(filename)
     # Prints when df is last updated
     print("df Updated at: ", datetime.datetime.now())
+    time = datetime.datetime.now() + datetime.timedelta(hours=5, minutes=30)
+    time = time.strftime("%d-%b") + ' at ' + time.strftime("%I:%M %p")
+    footer = f"Last Updated: {time}"
 
 
 @tasks.loop(seconds=20)
@@ -651,9 +671,13 @@ async def alert():
                             embed.add_field(
                                 name='Date', value=k['date'], inline=False)
                             embed.add_field(
+                                name='Address', value=k['address'], inline=False)
+                            embed.add_field(
                                 name='Pincode', value=k['pincode'], inline=False)
                             embed.add_field(
-                                name='Available Capacity', value=k['available_capacity'], inline=False)
+                                name='Available Capacity for Dose 1', value=k['available_capacity_dose1'], inline=False)
+                            embed.add_field(
+                                name='Available Capacity for Dose 2', value=k['available_capacity_dose2'], inline=False)
                             embed.add_field(
                                 name='Minimum Age', value=k['min_age_limit'], inline=False)
                             embed.add_field(
