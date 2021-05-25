@@ -1,3 +1,4 @@
+import json
 from typing_extensions import TypeAlias
 import requests
 import pandas as pd
@@ -129,16 +130,23 @@ async def on_guild_remove(guild):
     fp.write(dat)
     fp.close()
 
-    dat = ''
-    fp = open('mypings.csv', 'r')
-    for line in fp:
-        if(str(guild.id) in line.split(',')[1]):
-            continue
-        dat += line
+    fp = open('mypings.json', 'r')
+    data = json.load(fp)
     fp.close()
-    fp = open('mypings.csv', 'w')
-    fp.write(dat)
+    new_data = {}
+    guild_id = str(guild.id)
+    for pincodes in data:
+        id_dict = data[pincodes]
+        new_id_dict = {}
+        for uid in id_dict:
+            if guild_id in str(id_dict[uid]):
+                continue
+            new_id_dict[uid] = id_dict[uid]
+            new_data[pincodes] = new_id_dict
+    fp = open('mypings.json', 'w')
+    json.dump(new_data, fp)
     fp.close()
+
 
 
 @client.event
@@ -156,17 +164,22 @@ async def on_message(message):
 
 @client.event
 async def on_member_remove(member):
-    dat =''
-    fp = open('mypings.csv', 'r')
-    for line in fp:
-        if((str(member.guild.id) in line.split(',')[1]) and (str(member.id) in line.split(',')[0])):
-            continue
-        dat += line
+    fp = open('mypings.json', 'r')
+    data = json.load(fp)
     fp.close()
-    fp = open('mypings.csv', 'w')
-    fp.write(dat)
+    new_data = {}
+    member_id = str(member.id)
+    for pincodes in data:
+        id_dict = data[pincodes]
+        new_id_dict = {}
+        for uid in id_dict:
+            if member_id in str(uid):
+                continue
+            new_id_dict[uid] = id_dict[uid]
+            new_data[pincodes] = new_id_dict
+    fp = open('mypings.json', 'w')
+    json.dump(new_data, fp)
     fp.close()
-
 
 @client.command(aliases=['file', 'f'])
 async def file_command(ctx):
@@ -175,8 +188,8 @@ async def file_command(ctx):
         with open('alerts.csv', 'r') as fp:
             await client.get_channel(841561036305465344).send(file=discord.File(fp, 'alerts.csv'))
         fp.close()
-        with open('mypings.csv', 'r') as fp:
-            await client.get_channel(841561036305465344).send(file=discord.File(fp, 'mypings.csv'))
+        with open('mypings.json', 'r') as fp:
+            await client.get_channel(841561036305465344).send(file=discord.File(fp, 'mypings.json'))
         fp.close()
     else:
         await ctx.send("You are not authorised to run this command")
@@ -421,17 +434,18 @@ async def states_command(ctx, text=''):
 @client.command(aliases=['vaccine'])
 async def vaccine_command(ctx, pincode="", date=datetime.datetime.now().strftime("%d-%m-%Y")):
     # If no pincode given
-    if pincode == "":
-        await ctx.send("No pincode mentioned")
+    pincheck = await pincodecheckindia(pincode)
+    if not pincheck:
+        await ctx.send("Invalid pincode, try again")
     else:
         headers = {"Accept-Language": "en-IN",
                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
         data = {"pincode": pincode, "date": date}
         res = requests.get(
             "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin", headers=headers, params=data)
-        if res.status_code == 400:
-            await ctx.send("Invalid pincode")
-            return
+        # if res.status_code == 400:
+        #     await ctx.send("Invalid pincode")
+        #     return
         if res.status_code == 403:
             await ctx.send("API is unresponsive at the time. Please try again after sometime")
             return
@@ -673,6 +687,8 @@ async def alert():
                             embed.add_field(
                                 name='Date', value=k['date'], inline=False)
                             embed.add_field(
+                                name='Vaccine', value=k['vaccine'])
+                            embed.add_field(
                                 name='Address', value=k['address'], inline=False)
                             embed.add_field(
                                 name='Pincode', value=k['pincode'], inline=False)
@@ -683,33 +699,30 @@ async def alert():
                             embed.add_field(
                                 name='Minimum Age', value=k['min_age_limit'], inline=False)
                             embed.add_field(
-                                name='Vaccine', value=k['vaccine'])
-                            embed.add_field(
                                 name='Fee type', value=k['fee_type'], inline=False)
                             embed.add_field(name="Slots", value='\n'.join(
                                 k['slots']), inline=False)
                             fp = open('alerts.csv', 'r')
-                            fp2 = open('mypings.csv', 'r')
+                            fp2 = open('mypings.json', 'r')
+                            data = json.load(fp2)
+                            fp2.close()
                             ch_list = [line.split(',')[1] for line in list(
                                 filter(None, fp.read().split('\n')))]
                             for ch in ch_list:
                                 await client.get_channel(int(ch)).send(embed=embed)
+                                guild_id = str(client.get_channel(int(ch)).guild.id)
                                 try:
-                                    for line in fp2:
-                                        p_codes = line.replace('\n', '').split(',')[2]
-                                        file_guild_ids = line.split(',')[1]
-                                        channel_guild_id = client.get_channel(int(ch)).guild.id
-                                        if((str(k['pincode']) in p_codes) and (str(channel_guild_id) in file_guild_ids)):
-                                            member_id = int(line.split(',')[0])
-                                            memberObj = client.get_user(member_id)
-                                            await client.get_channel(int(ch)).send(memberObj.mention)
+                                    if(k['pincode'] in data):
+                                        id_dict = data[k['pincode']]
+                                        for uid in id_dict:
+                                            if(guild_id in str(id_dict[uid])):
+                                                member_id = int(uid)
+                                                memberMention = client.get_user(member_id).mention
+                                                await client.get_channel(int(ch)).send(memberMention)
                                 except Exception as e:
                                     continue
                             #await client.get_channel(841561036305465344).send(embed=embed)
                             fp.close()
-                            fp2.close()
-                                
-
                     else:
                         continue
             else:
@@ -829,80 +842,78 @@ async def reachreply_command(ctx, destid: int = 0, *, msg: str = ''):
 
 @client.command(aliases=['myping', 'mp'])
 async def personalpingcommand(ctx, pincode:int = 0):
+    await ctx.channel.trigger_typing()
     found = False
-    # if pincode == 0:
-    #     await ctx.send("Enter a pincode")
-    #     return
-    # if(len(str(pincode)) != 6):
-    #     await ctx.send("Enter a valid pincode")
-    #     return
     pincheck = await pincodecheckbangalore(str(pincode))
     if pincheck:
         with open('alerts.csv', 'r') as fp:
             for line in fp:  
-                if(str(ctx.guild.id) in line.replace('\n', '').split(',')[0]):
+                if(str(ctx.guild.id) in line.split(',')[0]):
                     found = True
         if not found:
             await ctx.send("Looks like your server isn't set up for vaccine alerts at all.\nContact your server moderators and ask them to run the `.alerts` command and then try again")
+            fp.close()
             return
+        fp = open('mypings.json', 'r')
+        data = json.load(fp)
         fp.close()
-        fp = open('mypings.csv', 'r')
-        for line in fp:
-            if((str(ctx.author.id) in line.replace('\n', '').split(',')[0]) and (str(pincode) in line.replace('\n', '').split(',')[2])):
+        user_id = str(ctx.author.id)
+        guild_id = str(ctx.guild.id)
+        subdict = {}
+        if(str(pincode) in data):
+            subdict = data[str(pincode)]
+            if(user_id in subdict):
                 await ctx.send("Looks like you've already subscribed for this pincode")
-                fp.close()
                 return
-        fp.close()
-        fp = open('mypings.csv', 'a+')
-        fp.write(f"{ctx.author.id},{ctx.guild.id},{pincode}\n")
+        subdict[user_id] = guild_id
+        data[str(pincode)] = subdict
+        fp = open('mypings.json', 'w')
+        json.dump(data, fp)
         fp.close()
         await ctx.send(f"You'll now get a ping every time there's a slot open in pincode: **{pincode}**")
     else:
-        await ctx.send("Pincode invalid,try again")
-
+        await ctx.send("Pincode invalid, try again")
 
 
 @client.command(aliases=['rp', 'removeping'])
 async def removepingcommand(ctx, pincode:int = 0):
-    removed = False
-    # if pincode == 0:
-    #     await ctx.send("Enter a pincode")
-    #     return
-    # if(len(str(pincode)) != 6):
-    #     await ctx.send("Enter a valid pincode")
-        #return
+    await ctx.channel.trigger_typing()
     pincheck = await pincodecheckbangalore(str(pincode))
     if pincheck:
-        dat =''
-        fp = open('mypings.csv', 'r')
-        for line in fp:
-            if((str(ctx.author.id) in line.replace('\n', '').split(',')[0]) and (str(ctx.guild.id) in line.replace('\n', '').split(',')[1]) and (str(pincode) in line.replace('\n', '').split(',')[2])):
-                removed = True
-                continue
-            dat += line
+        fp = open('mypings.json', 'r')
+        data = json.load(fp)
         fp.close()
-        fp = open('mypings.csv', 'w')
-        fp.write(dat)
-        fp.close()
-        if(removed):
-            await ctx.send(f"Alright, no more pings for pincode: **{pincode}**")
-        else:
+        user_id = str(ctx.author.id)
+        try:
+            subdict = data[str(pincode)]
+            subdict.pop(user_id)
+        except KeyError:
             await ctx.send(f"No record of pincode: **{pincode}** was found in our database")
+            return
+        data[str(pincode)] = subdict
+        fp = open('mypings.json', 'w')
+        json.dump(data, fp)
+        fp.close()
+        await ctx.send(f"Alright, no more pings for pincode: **{pincode}**")
     else:
-        await ctx.send("Pincode invalid,try again")
+        await ctx.send("Pincode invalid, try again")
 
 @client.command(aliases=['listpings', 'lp'])
 async def pinglist(ctx):
-    fp = open('mypings.csv', 'r')
-    dat = ''
-    for line in fp:
-        if(str(ctx.author.id) == line.replace('\n', '').split(',')[0]):
-            dat += line.replace('\n', '').split(',')[2] + "\n"
+    fp = open('mypings.json', 'r')
+    data = json.load(fp)
     fp.close()
-    if dat == '':
-        await ctx.send("You haven't set up for any personal pings. To do so, use `.personalping`")
+    user_id = str(ctx.author.id)
+    pinlist = ''
+    for pincodes in data:
+        id_dict = data[pincodes]
+        for uid in id_dict:
+            if user_id in str(uid):
+                pinlist += f"{pincodes}\n"
+    if pinlist == '':
+        await ctx.send("You haven't set up for any pincode pings. To do so, use `.myping`")
     else:
-        await ctx.send(f"You've set up to get pings for the following pincodes:\n{dat}")
+        await ctx.send(f"You've set up to get pings for the following pincodes:\n{pinlist}")
 
 async def pincodecheckindia(pincode):
     regex = "^[1-9]{1}[0-9]{2}\\s{0,1}[0-9]{3}$"
