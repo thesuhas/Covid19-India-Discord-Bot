@@ -8,3 +8,4 @@ guilds.txt
 *.csv
 nohup.out
 .env.save
+mypings.json
