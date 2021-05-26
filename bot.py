@@ -181,6 +181,20 @@ async def on_member_remove(member):
     json.dump(new_data, fp)
     fp.close()
 
+@client.event
+async def on_guild_channel_delete(channel):
+    ch_id = str(channel.id)
+    dat =''
+    fp = open('alerts.csv', 'r')
+    for line in fp:
+        if(ch_id in line.replace('\n', '').split(',')[1]):
+            continue
+        dat += line
+    fp.close()
+    fp = open('alerts.csv', 'w')
+    fp.write(dat)
+    fp.close()
+
 @client.command(aliases=['file', 'f'])
 async def file_command(ctx):
     if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872) or (ctx.author.id == 771985293011058708)):
