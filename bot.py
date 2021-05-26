@@ -712,8 +712,8 @@ async def alert():
                                 await client.get_channel(int(ch)).send(embed=embed)
                                 guild_id = str(client.get_channel(int(ch)).guild.id)
                                 try:
-                                    if(k['pincode'] in data):
-                                        id_dict = data[k['pincode']]
+                                    if(str(k['pincode']) in data):
+                                        id_dict = data[str(k['pincode'])]
                                         for uid in id_dict:
                                             if(guild_id in str(id_dict[uid])):
                                                 member_id = int(uid)
