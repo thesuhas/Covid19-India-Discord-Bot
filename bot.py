@@ -723,9 +723,9 @@ async def alert():
                             ch_list = [line.split(',')[1] for line in list(
                                 filter(None, fp.read().split('\n')))]
                             for ch in ch_list:
-                                await client.get_channel(int(ch)).send(embed=embed)
-                                guild_id = str(client.get_channel(int(ch)).guild.id)
                                 try:
+                                    await client.get_channel(int(ch)).send(embed=embed)
+                                    guild_id = str(client.get_channel(int(ch)).guild.id)
                                     if(str(k['pincode']) in data):
                                         id_dict = data[str(k['pincode'])]
                                         for uid in id_dict:
@@ -733,7 +733,7 @@ async def alert():
                                                 member_id = int(uid)
                                                 memberMention = client.get_user(member_id).mention
                                                 await client.get_channel(int(ch)).send(memberMention)
-                                except Exception as e:
+                                except:
                                     continue
                             #await client.get_channel(841561036305465344).send(embed=embed)
                             fp.close()
