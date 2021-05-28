@@ -725,6 +725,9 @@ async def alert():
                             for ch in ch_list:
                                 try:
                                     await client.get_channel(int(ch)).send(embed=embed)
+                                except:
+                                    continue
+                                try:
                                     guild_id = str(client.get_channel(int(ch)).guild.id)
                                     if(str(k['pincode']) in data):
                                         id_dict = data[str(k['pincode'])]
