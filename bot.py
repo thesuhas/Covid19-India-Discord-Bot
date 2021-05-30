@@ -786,7 +786,7 @@ async def alerts_command(ctx, dest: discord.TextChannel = None):
         await ctx.send("Looks like you don't have the manage server permissions to run this")
 
 
-@tasks.loop(second=300)
+@tasks.loop(seconds=300)
 async def clear():
     global s_id
     s_id = []
