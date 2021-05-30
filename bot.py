@@ -41,6 +41,8 @@ footer = 0
 # Initialising states list
 s = list()
 
+s_id = []
+
 # Initialising slash command
 slash = SlashCommand(client, sync_commands=True)
 
@@ -55,6 +57,7 @@ async def on_ready():
     update.start()
     update_daily.start()
     alert.start()
+    clear.start()
     # Create basic data frame and store
     test = requests.get(
         'https://api.covid19india.org/csv/latest/state_wise.csv')
@@ -148,7 +151,6 @@ async def on_guild_remove(guild):
     fp.close()
 
 
-
 @client.event
 async def on_message(message):
     if message.author.bot:
@@ -181,10 +183,11 @@ async def on_member_remove(member):
     json.dump(new_data, fp)
     fp.close()
 
+
 @client.event
 async def on_guild_channel_delete(channel):
     ch_id = str(channel.id)
-    dat =''
+    dat = ''
     fp = open('alerts.csv', 'r')
     for line in fp:
         if(ch_id in line.replace('\n', '').split(',')[1]):
@@ -194,6 +197,7 @@ async def on_guild_channel_delete(channel):
     fp = open('alerts.csv', 'w')
     fp.write(dat)
     fp.close()
+
 
 @client.command(aliases=['file', 'f'])
 async def file_command(ctx):
@@ -474,10 +478,13 @@ async def vaccine_command(ctx, pincode="", date=datetime.datetime.now().strftime
                     if j['available_capacity'] >= 1:
                         # Check if hospital exists
                         if (i['name'], i['pincode'], i['fee_type'], i['address']) in sessions:
-                            sessions[(i['name'], i['pincode'], i['fee_type'], i['address'])].append(j)
+                            sessions[(i['name'], i['pincode'],
+                                      i['fee_type'], i['address'])].append(j)
                         else:
-                            sessions[(i['name'], i['pincode'], i['fee_type'], i['address'])] = list()
-                            sessions[(i['name'], i['pincode'], i['fee_type'], i['address'])].append(j)
+                            sessions[(i['name'], i['pincode'],
+                                      i['fee_type'], i['address'])] = list()
+                            sessions[(i['name'], i['pincode'],
+                                      i['fee_type'], i['address'])].append(j)
             if len(sessions) == 0:
                 await ctx.send("No available sessions")
             else:
@@ -487,9 +494,9 @@ async def vaccine_command(ctx, pincode="", date=datetime.datetime.now().strftime
                         title=f"Vaccine Available at {sesh[0]}", color=discord.Color.green())
                     embed.add_field(name='Date', value=date, inline=False)
                     embed.add_field(
-                            name='Address', value=sesh[3], inline=False)
+                        name='Address', value=sesh[3], inline=False)
                     embed.add_field(
-                            name='Pin Code', value=sesh[1], inline=False)
+                        name='Pin Code', value=sesh[1], inline=False)
                     embed.add_field(
                         name='Available Capacity for Dose 1', value=sessions[sesh][0]['available_capacity_dose1'], inline=False)
                     embed.add_field(
@@ -499,7 +506,7 @@ async def vaccine_command(ctx, pincode="", date=datetime.datetime.now().strftime
                     embed.add_field(
                         name='Vaccine', value=sessions[sesh][0]['vaccine'])
                     embed.add_field(
-                            name='Fee type', value=sesh[2], inline=False)
+                        name='Fee type', value=sesh[2], inline=False)
                     embed.add_field(name="Slots", value='\n'.join(
                         sessions[sesh][0]['slots']), inline=False)
                     await ctx.send(embed=embed)
@@ -530,7 +537,7 @@ async def vaccine_slash(ctx, pincode="", date=datetime.datetime.now().strftime("
         data = res.json()
         sessions = dict()
         if len(data['centers']) > 0:
-            #pprint.pprint(data)
+            # pprint.pprint(data)
             for i in data['centers']:
 
                 # Look at all sessions
@@ -539,10 +546,13 @@ async def vaccine_slash(ctx, pincode="", date=datetime.datetime.now().strftime("
                     if j['available_capacity'] >= 1:
                         # Check if hospital exists
                         if i['name'] in sessions:
-                            sessions[(i['name'], i['pincode'], i['fee_type'], i['address'])].append(j)
+                            sessions[(i['name'], i['pincode'],
+                                      i['fee_type'], i['address'])].append(j)
                         else:
-                            sessions[(i['name'], i['pincode'], i['fee_type'], i['address'])] = list()
-                            sessions[(i['name'], i['pincode'], i['fee_type'], i['address'])].append(j)
+                            sessions[(i['name'], i['pincode'],
+                                      i['fee_type'], i['address'])] = list()
+                            sessions[(i['name'], i['pincode'],
+                                      i['fee_type'], i['address'])].append(j)
             if len(sessions) == 0:
                 await ctx.send("No available sessions")
             else:
@@ -552,9 +562,9 @@ async def vaccine_slash(ctx, pincode="", date=datetime.datetime.now().strftime("
                         title=f"Vaccine Available at {sesh[0]}", color=discord.Color.green())
                     embed.add_field(name='Date', value=date, inline=False)
                     embed.add_field(
-                            name='Address', value=sesh[3], inline=False)
+                        name='Address', value=sesh[3], inline=False)
                     embed.add_field(
-                            name='Pin Code', value=sesh[1], inline=False)
+                        name='Pin Code', value=sesh[1], inline=False)
                     embed.add_field(
                         name='Available Capacity for Dose 1', value=sessions[sesh][0]['available_capacity_dose1'], inline=False)
                     embed.add_field(
@@ -564,7 +574,7 @@ async def vaccine_slash(ctx, pincode="", date=datetime.datetime.now().strftime("
                     embed.add_field(
                         name='Vaccine', value=sessions[sesh][0]['vaccine'])
                     embed.add_field(
-                            name='Fee type', value=sesh[2], inline=False)
+                        name='Fee type', value=sesh[2], inline=False)
                     embed.add_field(name="Slots", value='\n'.join(
                         sessions[sesh][0]['slots']), inline=False)
                     await ctx.send(embed=embed)
@@ -668,6 +678,7 @@ async def update():
 
 @tasks.loop(seconds=20)
 async def alert():
+    global s_id
     date = datetime.datetime.now().strftime("%d-%m-%Y")
     datetom = (datetime.datetime.now() +
                datetime.timedelta(days=1)).strftime("%d-%m-%Y")
@@ -689,13 +700,13 @@ async def alert():
             else:
                 res = requests.get(url, params=data)
             #resp = res.json()
-            #print(res.json())
+            # print(res.json())
             #print(res.status_code, j)
             if(res.status_code == 200):
                 resp = res.json()
                 for k in resp['sessions']:
                     if(len(k) != 0):
-                        if(math.trunc(k['available_capacity_dose1']) >= 8 and k['min_age_limit'] == 18 and ((k['available_capacity_dose1'])-int(k['available_capacity_dose1'])) == 0):
+                        if(math.trunc(k['available_capacity_dose1']) >= 8 and k['min_age_limit'] == 18 and ((k['available_capacity_dose1'])-int(k['available_capacity_dose1'])) == 0 and k['session_id'] not in s_id):
                             embed = discord.Embed(
                                 title=f"Vaccine Available at {k['name']}", color=discord.Color.green())
                             embed.add_field(
@@ -716,6 +727,7 @@ async def alert():
                                 name='Fee type', value=k['fee_type'], inline=False)
                             embed.add_field(name="Slots", value='\n'.join(
                                 k['slots']), inline=False)
+                            s_id.append(str(k['session_id']))
                             fp = open('alerts.csv', 'r')
                             fp2 = open('mypings.json', 'r')
                             data = json.load(fp2)
@@ -728,17 +740,19 @@ async def alert():
                                 except:
                                     continue
                                 try:
-                                    guild_id = str(client.get_channel(int(ch)).guild.id)
+                                    guild_id = str(
+                                        client.get_channel(int(ch)).guild.id)
                                     if(str(k['pincode']) in data):
                                         id_dict = data[str(k['pincode'])]
                                         for uid in id_dict:
                                             if(guild_id in str(id_dict[uid])):
                                                 member_id = int(uid)
-                                                memberMention = client.get_user(member_id).mention
+                                                memberMention = client.get_user(
+                                                    member_id).mention
                                                 await client.get_channel(int(ch)).send(memberMention)
                                 except:
                                     continue
-                            #await client.get_channel(841561036305465344).send(embed=embed)
+                            # await client.get_channel(841561036305465344).send(embed=embed)
                             fp.close()
                     else:
                         continue
@@ -770,6 +784,13 @@ async def alerts_command(ctx, dest: discord.TextChannel = None):
             await ctx.send("I don't have enough permissions in that channel. Enable `Send Messages` and `Embed Links` for me")
     else:
         await ctx.send("Looks like you don't have the manage server permissions to run this")
+
+
+@tasks.loop(300)
+async def clear():
+    global s_id
+    s_id = []
+    return
 
 
 @client.command(aliases=['removealerts'])
@@ -858,13 +879,13 @@ async def reachreply_command(ctx, destid: int = 0, *, msg: str = ''):
 
 
 @client.command(aliases=['myping', 'mp'])
-async def personalpingcommand(ctx, pincode:int = 0):
+async def personalpingcommand(ctx, pincode: int = 0):
     await ctx.channel.trigger_typing()
     found = False
     pincheck = await pincodecheckbangalore(str(pincode))
     if pincheck:
         with open('alerts.csv', 'r') as fp:
-            for line in fp:  
+            for line in fp:
                 if(str(ctx.guild.id) in line.split(',')[0]):
                     found = True
         if not found:
@@ -893,7 +914,7 @@ async def personalpingcommand(ctx, pincode:int = 0):
 
 
 @client.command(aliases=['rp', 'removeping'])
-async def removepingcommand(ctx, pincode:int = 0):
+async def removepingcommand(ctx, pincode: int = 0):
     await ctx.channel.trigger_typing()
     pincheck = await pincodecheckbangalore(str(pincode))
     if pincheck:
@@ -915,6 +936,7 @@ async def removepingcommand(ctx, pincode:int = 0):
     else:
         await ctx.send("Pincode invalid, try again")
 
+
 @client.command(aliases=['listpings', 'lp'])
 async def pinglist(ctx):
     fp = open('mypings.json', 'r')
@@ -932,19 +954,21 @@ async def pinglist(ctx):
     else:
         await ctx.send(f"You've set up to get pings for the following pincodes:\n{pinlist}")
 
+
 async def pincodecheckindia(pincode):
     regex = "^[1-9]{1}[0-9]{2}\\s{0,1}[0-9]{3}$"
     pin = re.compile(regex)
-    check = re.match(pin,pincode)
+    check = re.match(pin, pincode)
     if check is not None:
         return True
     else:
         return False
 
+
 async def pincodecheckbangalore(pincode):
     regex = "^[5]{1}[6]{1}[02]{1}\\s{0,1}[0-2]{1}[0-9]{2}$"
     pin = re.compile(regex)
-    check = re.match(pin,pincode)
+    check = re.match(pin, pincode)
     if check is not None:
         return True
     else:
