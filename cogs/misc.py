@@ -1,6 +1,7 @@
+import json
 import discord
 from discord.ext import commands
-import os
+from helpers import Helpers
 
 class Misc(commands.Cog):
     # Initialisation
@@ -50,22 +51,22 @@ class Misc(commands.Cog):
                 title="**Help**", color=discord.Color.green())
             help_embed.add_field(
                 name='**`.india`**', value='Get COVID-19 stats of the entire nation', inline=False)
-            help_embed.add_field(name='**`.states`**',
-                                value='Get a list of states', inline=False)
+            help_embed.add_field(
+                name='**`.states`**', value='Get a list of states', inline=False)
             help_embed.add_field(
                 name='**`.state {state}`**', value='Get cases in that particular state', inline=False)
             help_embed.add_field(
                 name='**`.vaccine {pincode} [date]`**', value='Get vaccination slots near you. If `date` is not mentioned, it will take today\'s date', inline=False)
-            help_embed.add_field(name='**`.beds {type of hospital}`**',
-                                value='Get available beds. Type can be `government/govt` or `private`(Only Bengaluru)', inline=False)
+            help_embed.add_field(
+                name='**`.beds {type of hospital}`**', value='Get available beds. Type can be `government/govt` or `private`(Only Bengaluru)', inline=False)
             help_embed.add_field(
                 name='**`.alerts {channel name}`**', value='(only for members with \"Manage Server\" permissions) To register any channel on your server to get important alerts from the developers', inline=False)
-            help_embed.add_field(name='**`.removealerts`**',
-                                value='(only for members with \"Manage Server\" permissions) To de-register any channel that was registered for alerts', inline=False)
+            help_embed.add_field(
+                name='**`.removealerts`**', value='(only for members with \"Manage Server\" permissions) To de-register any channel that was registered for alerts', inline=False)
             help_embed.add_field(
                 name='**`.invite`**', value='Get the invite link of the bot', inline=False)
-            help_embed.add_field(name='**`.contribute`**',
-                                value='If you wish to contribute or learn about the bot', inline=False)
+            help_embed.add_field(
+                name='**`.contribute`**', value='If you wish to contribute or learn about the bot', inline=False)
             help_embed.add_field(
                 name='**`.reachout`**', value='(only for Server Administrators) To reach out to the bot developers', inline=False)
             await ctx.send(embed=help_embed)
@@ -144,6 +145,81 @@ class Misc(commands.Cog):
                 await ctx.send("I don't have enough permissions in that channel. Enable `Send Messages` and `Embed Links` for me")
         else:
             await ctx.send("Looks like you don't have the manage server permissions to run this")
+
+    @commands.command(aliases=['myping', 'mp'])
+    async def personalpingcommand(self, ctx, pincode: int = 0):
+        await ctx.channel.trigger_typing()
+        found = False
+        pincheck = Helpers.pincodecheckbangalore(str(pincode))
+        if pincheck:
+            with open('alerts.csv', 'r') as fp:
+                for line in fp:
+                    if(str(ctx.guild.id) in line.split(',')[0]):
+                        found = True
+            if not found:
+                await ctx.send("Looks like your server isn't set up for vaccine alerts at all.\nContact your server moderators and ask them to run the `.alerts` command and then try again")
+                fp.close()
+                return
+            fp = open('mypings.json', 'r')
+            data = json.load(fp)
+            fp.close()
+            user_id = str(ctx.author.id)
+            guild_id = str(ctx.guild.id)
+            subdict = {}
+            if(str(pincode) in data):
+                subdict = data[str(pincode)]
+                if(user_id in subdict):
+                    await ctx.send("Looks like you've already subscribed for this pincode")
+                    return
+            subdict[user_id] = guild_id
+            data[str(pincode)] = subdict
+            fp = open('mypings.json', 'w')
+            json.dump(data, fp)
+            fp.close()
+            await ctx.send(f"You'll now get a ping every time there's a slot open in pincode: **{pincode}**")
+        else:
+            await ctx.send("Pincode invalid, try again")
+
+    @commands.command(aliases=['rp', 'removeping'])
+    async def removepingcommand(self, ctx, pincode: int = 0):
+        await ctx.channel.trigger_typing()
+        pincheck = Helpers.pincodecheckbangalore(str(pincode))
+        if pincheck:
+            fp = open('mypings.json', 'r')
+            data = json.load(fp)
+            fp.close()
+            user_id = str(ctx.author.id)
+            try:
+                subdict = data[str(pincode)]
+                subdict.pop(user_id)
+            except KeyError:
+                await ctx.send(f"No record of pincode: **{pincode}** was found in our database")
+                return
+            data[str(pincode)] = subdict
+            fp = open('mypings.json', 'w')
+            json.dump(data, fp)
+            fp.close()
+            await ctx.send(f"Alright, no more pings for pincode: **{pincode}**")
+        else:
+            await ctx.send("Pincode invalid, try again")
+
+    @commands.command(aliases=['lp', 'listpings'])
+    async def pinglist(self, ctx):
+        fp = open('mypings.json', 'r')
+        data = json.load(fp)
+        fp.close()
+        user_id = str(ctx.author.id)
+        pinlist = ''
+        for pincodes in data:
+            id_dict = data[pincodes]
+            for uid in id_dict:
+                if user_id in str(uid):
+                    pinlist += f"{pincodes}\n"
+        if pinlist == '':
+            await ctx.send("You haven't set up for any pincode pings. To do so, use `.myping`")
+        else:
+            await ctx.send(f"You've set up to get pings for the following pincodes:\n{pinlist}")
+
 
 
 

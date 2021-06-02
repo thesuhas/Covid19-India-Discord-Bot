@@ -5,6 +5,7 @@ import requests
 from babel.numbers import format_currency
 import datetime
 import io
+from cowin import Cowin
 
 class Data(commands.Cog):
     # Initialisation command
@@ -36,6 +37,8 @@ class Data(commands.Cog):
         # Starting loops
         self.update.start()
         self.update_daily.start()
+        Cowin.alert.start()
+        Cowin.clear.start()
 
         test = requests.get(
         'https://api.covid19india.org/csv/latest/state_wise.csv')

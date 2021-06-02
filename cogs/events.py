@@ -1,3 +1,4 @@
+import json
 import discord
 from discord.ext import commands
 
@@ -40,15 +41,21 @@ class Events(commands.Cog):
         fp.write(dat)
         fp.close()
 
-        dat = ''
-        fp = open('mypings.csv', 'r')
-        for line in fp:
-            if(str(guild.id) in line.split(',')[1]):
-                continue
-            dat += line
+        fp = open('mypings.json', 'r')
+        data = json.load(fp)
         fp.close()
-        fp = open('mypings.csv', 'w')
-        fp.write(dat)
+        new_data = {}
+        guild_id = str(guild.id)
+        for pincodes in data:
+            id_dict = data[pincodes]
+            new_id_dict = {}
+            for uid in id_dict:
+                if guild_id in str(id_dict[uid]):
+                    continue
+                new_id_dict[uid] = id_dict[uid]
+                new_data[pincodes] = new_id_dict
+        fp = open('mypings.json', 'w')
+        json.dump(new_data, fp)
         fp.close()
 
     @commands.Cog.listener()
@@ -65,14 +72,34 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
-        dat =''
-        fp = open('mypings.csv', 'r')
+        fp = open('mypings.json', 'r')
+        data = json.load(fp)
+        fp.close()
+        new_data = {}
+        member_id = str(member.id)
+        for pincodes in data:
+            id_dict = data[pincodes]
+            new_id_dict = {}
+            for uid in id_dict:
+                if member_id in str(uid):
+                    continue
+                new_id_dict[uid] = id_dict[uid]
+                new_data[pincodes] = new_id_dict
+        fp = open('mypings.json', 'w')
+        json.dump(new_data, fp)
+        fp.close()
+
+    @commands.Cog.listener()
+    async def on_guild_channel_delete(self, channel):
+        ch_id = str(channel.id)
+        dat = ''
+        fp = open('alerts.csv', 'r')
         for line in fp:
-            if((str(member.guild.id) in line.split(',')[1]) and (str(member.id) in line.split(',')[0])):
+            if(ch_id in line.replace('\n', '').split(',')[1]):
                 continue
             dat += line
         fp.close()
-        fp = open('mypings.csv', 'w')
+        fp = open('alerts.csv', 'w')
         fp.write(dat)
         fp.close()
 

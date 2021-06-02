@@ -1,16 +1,19 @@
+import json
 import discord
 from discord.ext import commands, tasks
 import requests
 import datetime
 import math
 import os
-import re
+from helpers import Helpers
 
 
 class Cowin(commands.Cog):
     # Initialisation
     def __init__(self, client):
         self.client = client
+        self.s_id = []
+
 
         # URLs
         self.url1 = os.getenv('url1')
@@ -20,8 +23,9 @@ class Cowin(commands.Cog):
     @commands.command(aliases=['vaccine'])
     async def vaccine_command(self, ctx, pincode="", date=datetime.datetime.now().strftime("%d-%m-%Y")):
         # If no pincode given
-        if pincode == "":
-            await ctx.send("No pincode mentioned")
+        pincheck = Helpers.pincodecheckindia(pincode)
+        if not pincheck:
+            await ctx.send("Invalid pincode, try again")
         else:
             headers = {"Accept-Language": "en-IN",
                     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
@@ -106,7 +110,7 @@ class Cowin(commands.Cog):
                     resp = res.json()
                     for k in resp['sessions']:
                         if(len(k) != 0):
-                            if(math.trunc(k['available_capacity_dose1']) >= 8 and k['min_age_limit'] == 18 and ((k['available_capacity_dose1'])-int(k['available_capacity_dose1'])) == 0):
+                            if(math.trunc(k['available_capacity_dose1']) >= 8 and k['min_age_limit'] == 18 and ((k['available_capacity_dose1'])-int(k['available_capacity_dose1'])) == 0 and (k['session_id'] not in self.s_id)):
                                 embed = discord.Embed(
                                     title=f"Vaccine Available at {k['name']}", color=discord.Color.green())
                                 embed.add_field(
@@ -127,48 +131,42 @@ class Cowin(commands.Cog):
                                     name='Fee type', value=k['fee_type'], inline=False)
                                 embed.add_field(name="Slots", value='\n'.join(
                                     k['slots']), inline=False)
+                                self.s_id.append(str(k['session_id']))
                                 fp = open('alerts.csv', 'r')
-                                fp2 = open('mypings.csv', 'r')
+                                fp2 = open('mypings.json', 'r')
+                                data = json.load(fp2)
+                                fp2.close()
                                 ch_list = [line.split(',')[1] for line in list(
                                     filter(None, fp.read().split('\n')))]
                                 for ch in ch_list:
-                                    await self.client.get_channel(int(ch)).send(embed=embed)
                                     try:
-                                        for line in fp2:
-                                            p_codes = line.replace('\n', '').split(',')[2]
-                                            file_guild_ids = line.split(',')[1]
-                                            channel_guild_id = self.client.get_channel(int(ch)).guild.id
-                                            if((str(k['pincode']) in p_codes) and (str(channel_guild_id) in file_guild_ids)):
-                                                member_id = int(line.split(',')[0])
-                                                memberObj =self. client.get_user(member_id)
-                                                await self.client.get_channel(int(ch)).send(memberObj.mention)
-                                    except Exception as e:
+                                        await self.client.get_channel(int(ch)).send(embed=embed)
+                                    except:
                                         continue
-                                #await client.get_channel(841561036305465344).send(embed=embed)
+                                    try:
+                                        guild_id = str(
+                                            self.client.get_channel(int(ch)).guild.id)
+                                        if(str(k['pincode']) in data):
+                                            id_dict = data[str(k['pincode'])]
+                                            for uid in id_dict:
+                                                if(guild_id in str(id_dict[uid])):
+                                                    member_id = int(uid)
+                                                    memberMention = self.client.get_user(
+                                                        member_id).mention
+                                                    await self.client.get_channel(int(ch)).send(memberMention)
+                                    except:
+                                        continue
+                                # await client.get_channel(841561036305465344).send(embed=embed)
                                 fp.close()
-                                fp2.close()
                         else:
                             continue
                 else:
                     continue
 
-    async def pincodecheckindia(pincode):
-        regex = "^[1-9]{1}[0-9]{2}\\s{0,1}[0-9]{3}$"
-        pin = re.compile(regex)
-        check = re.match(pin,pincode)
-        if check is not None:
-            return True
-        else:
-            return False
-
-    async def pincodecheckbangalore(pincode):
-        regex = "^[5]{1}[6]{1}[02]{1}\\s{0,1}[0-2]{1}[0-9]{2}$"
-        pin = re.compile(regex)
-        check = re.match(pin,pincode)
-        if check is not None:
-            return True
-        else:
-            return False
+    @tasks.loop(seconds=300)
+    async def clear(self):
+        self.s_id = []
+        return
 
 
 def setup(client):

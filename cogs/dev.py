@@ -13,7 +13,7 @@ class Dev(commands.Cog):
             with open('alerts.csv', 'r') as fp:
                 await self.client.get_channel(841561036305465344).send(file=discord.File(fp, 'alerts.csv'))
             fp.close()
-            with open('mypings.csv', 'r') as fp:
+            with open('mypings.json', 'r') as fp:
                 await self.client.get_channel(841561036305465344).send(file=discord.File(fp, 'mypings.csv'))
             fp.close()
         else:
@@ -54,6 +54,27 @@ class Dev(commands.Cog):
             fp.close()
         else:
             await ctx.send("You don't have permission to execute this command")
+
+    @commands.command(aliases=['reachreply'])
+    async def reachreply_command(self, ctx, destid: int = 0, *, msg: str = ''):
+        if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872) or (ctx.author.id == 771985293011058708)):
+            if(destid == 0):
+                await ctx.send("Saar, enter channel ID")
+                return
+            if(msg == ''):
+                await ctx.send("Saar, tell something to reply to them")
+                return
+            try:
+                dest = self.client.get_channel(destid)
+            except:
+                await ctx.send("Can't fetch that channel")
+                return
+            await dest.send("**MESSAGE FROM THE DEVS**")
+            await dest.send(msg)
+            await ctx.send("Message sent")
+        else:
+            await ctx.send("You do not have the permission to execute this command")
+
 
 
 
