@@ -677,7 +677,6 @@ async def update():
 
 
 @tasks.loop(seconds=10)
-# test
 async def alert():
     global s_id
     date = datetime.datetime.now().strftime("%d-%m-%Y")
