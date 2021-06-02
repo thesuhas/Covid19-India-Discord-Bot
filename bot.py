@@ -676,7 +676,7 @@ async def update():
     footer = f"Last Updated: {time}"
 
 
-@tasks.loop(seconds=10)
+@tasks.loop(seconds=5)
 async def alert():
     global s_id
     date = datetime.datetime.now().strftime("%d-%m-%Y")
@@ -757,6 +757,7 @@ async def alert():
                     else:
                         continue
             else:
+                await client.get_channel(841560857602162698).send('There is an issue with alerts,check bot')
                 continue
 
 
