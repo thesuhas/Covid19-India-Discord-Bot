@@ -757,6 +757,7 @@ async def alert():
                     else:
                         continue
             else:
+                await client.get_channel(841560857602162698).send('There is an issue with alerts,check bot')
                 continue
 
 
