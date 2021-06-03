@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from discord_slash import cog_ext
 import json
-from helpers import Helpers
+from cogs import helpers
 
 class Misc(commands.Cog):
     # Initialisation
@@ -110,7 +110,7 @@ class Misc(commands.Cog):
             return
         auth_perms = ctx.channel.permissions_for(ctx.author)
         if(auth_perms.manage_guild):
-            fp = open('data\\alerts.csv', 'r')
+            fp = open('data/alerts.csv', 'r')
             for line1 in fp:
                 if(str(dest.id) in str(line1.split(',')[1].rstrip('\n'))):
                     fp.close()
@@ -123,12 +123,12 @@ class Misc(commands.Cog):
                 fp.close()
                 return
             dat = ''
-            fp = open('data\\alerts.csv', 'r')
+            fp = open('data/alerts.csv', 'r')
             for line1 in fp:
                 if(str(dest.id) not in str(line1.split(',')[1].rstrip('\n'))):
                     dat += line1
             fp.close()
-            fp = open('data\\alerts.csv', 'w')
+            fp = open('data/alerts.csv', 'w')
             fp.write(dat)
             fp.close()
             await ctx.send(f"**DONE**. {dest.mention} will no longer receive alerts and updates from the developers")
@@ -155,7 +155,7 @@ class Misc(commands.Cog):
             return
         auth_perms = ctx.channel.permissions_for(ctx.author)
         if(auth_perms.manage_guild):
-            file1 = open('data\\alerts.csv', 'r')
+            file1 = open('data/alerts.csv', 'r')
             for line in file1:
                 if(str(dest.id) in str(line.split(',')[1].rstrip('\n'))):
                     await ctx.send(f"Looks like {dest.mention} is already subscribed to our alerts")
@@ -164,7 +164,7 @@ class Misc(commands.Cog):
             client_member = ctx.guild.get_member(836578128305717279)
             client_perms = client_member.permissions_in(dest)
             if(client_perms.send_messages and client_perms.embed_links):
-                file1 = open('data\\alerts.csv', 'a')
+                file1 = open('data/alerts.csv', 'a')
                 file1.write(f"{ctx.guild.id},{dest.id}\n")
                 file1.close()
                 await ctx.send(f"**Success!** You'll now get vaccine slot alerts in Bengaluru and other important notifications from the bot on {dest.mention}")
@@ -177,9 +177,9 @@ class Misc(commands.Cog):
     async def personalpingcommand(self, ctx, pincode: int = 0):
         await ctx.channel.trigger_typing()
         found = False
-        pincheck = Helpers.pincodecheckbangalore(str(pincode))
+        pincheck = helpers.Helpers.pincodecheckbangalore(str(pincode))
         if pincheck:
-            with open('data\\alerts.csv', 'r') as fp:
+            with open('data/alerts.csv', 'r') as fp:
                 for line in fp:
                     if(str(ctx.guild.id) in line.split(',')[0]):
                         found = True
@@ -187,7 +187,7 @@ class Misc(commands.Cog):
                 await ctx.send("Looks like your server isn't set up for vaccine alerts at all.\nContact your server moderators and ask them to run the `.alerts` command and then try again")
                 fp.close()
                 return
-            fp = open('data\\mypings.json', 'r')
+            fp = open('data/mypings.json', 'r')
             data = json.load(fp)
             fp.close()
             user_id = str(ctx.author.id)
@@ -200,7 +200,7 @@ class Misc(commands.Cog):
                     return
             subdict[user_id] = guild_id
             data[str(pincode)] = subdict
-            fp = open('data\\mypings.json', 'w')
+            fp = open('data/mypings.json', 'w')
             json.dump(data, fp)
             fp.close()
             await ctx.send(f"You'll now get a ping every time there's a slot open in pincode: **{pincode}**")
@@ -210,9 +210,9 @@ class Misc(commands.Cog):
     @commands.command(aliases=['rp', 'removeping'])
     async def removepingcommand(self, ctx, pincode: int = 0):
         await ctx.channel.trigger_typing()
-        pincheck = Helpers.pincodecheckbangalore(str(pincode))
+        pincheck = helpers.Helpers.pincodecheckbangalore(str(pincode))
         if pincheck:
-            fp = open('data\\mypings.json', 'r')
+            fp = open('data/mypings.json', 'r')
             data = json.load(fp)
             fp.close()
             user_id = str(ctx.author.id)
@@ -223,7 +223,7 @@ class Misc(commands.Cog):
                 await ctx.send(f"No record of pincode: **{pincode}** was found in our database")
                 return
             data[str(pincode)] = subdict
-            fp = open('data\\mypings.json', 'w')
+            fp = open('data/mypings.json', 'w')
             json.dump(data, fp)
             fp.close()
             await ctx.send(f"Alright, no more pings for pincode: **{pincode}**")
@@ -232,7 +232,7 @@ class Misc(commands.Cog):
 
     @commands.command(aliases=['lp', 'listpings'])
     async def pinglist(self, ctx):
-        fp = open('data\\mypings.json', 'r')
+        fp = open('data/mypings.json', 'r')
         data = json.load(fp)
         fp.close()
         user_id = str(ctx.author.id)

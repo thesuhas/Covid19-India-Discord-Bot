@@ -5,7 +5,7 @@ from discord_slash import cog_ext
 import requests
 import datetime
 import os
-from helpers import Helpers
+from cogs import helpers
 
 
 class Cowin(commands.Cog):
@@ -22,10 +22,15 @@ class Cowin(commands.Cog):
         self.url = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict"
 
 
+    @commands.Cog.listener()
+    async def on_ready(self):
+        self.clear.start()
+        self.alert.start()
+    
     @commands.command(aliases=['vaccine'])
     async def vaccine_command(self, ctx, pincode="", date=datetime.datetime.now().strftime("%d-%m-%Y")):
         # If no pincode given
-        pincheck = Helpers.pincodecheckindia(pincode)
+        pincheck = helpers.Helpers.pincodecheckindia(pincode)
         if not pincheck:
             await ctx.send("Invalid pincode, try again")
         else:
@@ -87,7 +92,7 @@ class Cowin(commands.Cog):
     async def vaccine_slash(self, ctx, pincode="", date=datetime.datetime.now().strftime("%d-%m-%Y")):
         await ctx.defer()
         # If no pincode given
-        pincheck = Helpers.pincodecheckindia(pincode)
+        pincheck = helpers.Helpers.pincodecheckindia(pincode)
         if not pincheck:
             await ctx.send("Invalid pincode, try again")
         else:
@@ -150,7 +155,7 @@ class Cowin(commands.Cog):
             else:
                 await ctx.send("No available vaccination center")
 
-    @tasks.loop(seconds=7)
+    @tasks.loop(seconds=4)
     async def alert(self):
         date = datetime.datetime.now().strftime("%d-%m-%Y")
         datetom = (datetime.datetime.now() +
@@ -202,8 +207,8 @@ class Cowin(commands.Cog):
                             embed.add_field(name="Slots", value='\n'.join(
                                 k['slots']), inline=False)
                             self.s_id.append(str(k['session_id']))
-                            fp = open('data\\alerts.csv', 'r')
-                            fp2 = open('data\\mypings.json', 'r')
+                            fp = open('data/alerts.csv', 'r')
+                            fp2 = open('data/mypings.json', 'r')
                             data = json.load(fp2)
                             fp2.close()
                             ch_list = [line.split(',')[1] for line in list(
@@ -231,6 +236,7 @@ class Cowin(commands.Cog):
                         else:
                             continue
                 else:
+                    await self.client.get_channel(841561036305465344).send("Flask died. Check ASAP")
                     continue
 
     @tasks.loop(seconds=300)
