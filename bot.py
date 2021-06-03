@@ -725,7 +725,7 @@ async def alert():
                             name='Minimum Age', value=k['min_age_limit'], inline=False)
                         if(k['fee_type'] == 'Paid'):
                             embed.add_field(name='Fee type', value=str(
-                                k['fee_type'])+str(k['fee']), inline=False)
+                                k['fee_type'])+'-Rs.'+str(k['fee']), inline=False)
                         else:
                             embed.add_field(name='Fee type', value=str(
                                 k['fee_type']), inline=False)
