@@ -11,3 +11,5 @@ nohup.out
 mypings.json
 test.py
 data/
+cogs/__pycache__
+*.pyc
