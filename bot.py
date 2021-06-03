@@ -705,7 +705,7 @@ async def alert():
             if(res.status_code == 200):
                 resp = res.json()
                 for k in resp['sessions']:
-                    if(len(k) != 0):
+                    if(len(k) != 0 and k['session_id'] not in s_id):
                         # if(math.trunc(k['available_capacity_dose1']) >= 8 and k['min_age_limit'] == 18 and ((k['available_capacity_dose1'])-int(k['available_capacity_dose1'])) == 0 and k['session_id'] not in s_id):
                         embed = discord.Embed(
                             title=f"Vaccine Available at {k['name']}", color=discord.Color.green())
