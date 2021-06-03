@@ -1,6 +1,6 @@
-import json
 import discord
 from discord.ext import commands
+import json
 
 class Events(commands.Cog):
     def __init__(self, client):
@@ -32,16 +32,16 @@ class Events(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
         dat = ''
-        fp = open('alerts.csv', 'r')
+        fp = open('data\\alerts.csv', 'r')
         for line1 in fp:
             if(str(guild.id) not in line1.split(',')):
                 dat += line1
         fp.close()
-        fp = open('alerts.csv', 'w')
+        fp = open('data\\alerts.csv', 'w')
         fp.write(dat)
         fp.close()
 
-        fp = open('mypings.json', 'r')
+        fp = open('data\\mypings.json', 'r')
         data = json.load(fp)
         fp.close()
         new_data = {}
@@ -54,7 +54,7 @@ class Events(commands.Cog):
                     continue
                 new_id_dict[uid] = id_dict[uid]
                 new_data[pincodes] = new_id_dict
-        fp = open('mypings.json', 'w')
+        fp = open('data\\mypings.json', 'w')
         json.dump(new_data, fp)
         fp.close()
 
@@ -72,7 +72,7 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
-        fp = open('mypings.json', 'r')
+        fp = open('data\\mypings.json', 'r')
         data = json.load(fp)
         fp.close()
         new_data = {}
@@ -85,7 +85,7 @@ class Events(commands.Cog):
                     continue
                 new_id_dict[uid] = id_dict[uid]
                 new_data[pincodes] = new_id_dict
-        fp = open('mypings.json', 'w')
+        fp = open('data\\mypings.json', 'w')
         json.dump(new_data, fp)
         fp.close()
 
@@ -93,13 +93,13 @@ class Events(commands.Cog):
     async def on_guild_channel_delete(self, channel):
         ch_id = str(channel.id)
         dat = ''
-        fp = open('alerts.csv', 'r')
+        fp = open('data\\alerts.csv', 'r')
         for line in fp:
             if(ch_id in line.replace('\n', '').split(',')[1]):
                 continue
             dat += line
         fp.close()
-        fp = open('alerts.csv', 'w')
+        fp = open('data\\alerts.csv', 'w')
         fp.write(dat)
         fp.close()
 

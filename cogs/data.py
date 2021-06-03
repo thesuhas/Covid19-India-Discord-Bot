@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands, tasks
+from discord_slash import cog_ext
 import pandas as pd
 import requests
 from babel.numbers import format_currency
@@ -110,6 +111,37 @@ class Data(commands.Cog):
                                     1:-3] + '\n(+' + format_currency(int(self.df_daily[self.df_daily['Status'] == 'Deceased'][self.mapp[state]]), 'INR', locale='en_IN')[1:-3] + ')', inline=False)
                     embed.set_footer(text=self.footer)
                     await ctx.send(embed=embed)
+
+    @cog_ext.cog_slash(name='state', description='State-wise stats of COVID-19')
+    async def state_slash(self, ctx, *, state=''):
+        # .defer lets bot think for upto 15 seconds
+        await ctx.defer()
+        if state == '':
+            # If state has not been mentioned
+            embed = discord.Embed(title="State", color=discord.Color.green(
+            ), description='Need to mention a state.\n**Syntax:** `.state {state}`\n Run `.help` for more info')
+            await ctx.send(embed=embed)
+        else:
+            if (state.lower() == "total"):
+                await ctx.send("Use `.india` for total cases")
+            else:
+                entry = self.df.loc[self.df['State'] == state.lower()]
+                if entry.empty:
+                    await ctx.send("Chosen state not available")
+                else:
+                    #m = f"**Covid Cases in {state[0].upper() + state[1:]}:**\nConfirmed: {entry['Confirmed'].values[0]}\nRecovered: {entry['Recovered'].values[0]}\nDeaths: {entry['Deaths'].values[0]}\nActive: {entry['Active'].values[0]}"
+                    embed = discord.Embed(
+                        title=f"Cases in {state[0].upper() + state[1:]}", color=discord.Color.green())
+                    embed.add_field(name='Active', value=format_currency(
+                        int(entry['Active'].values[0]), 'INR', locale='en_IN')[1:-3], inline=False)
+                    embed.add_field(name='Confirmed', value=format_currency(int(entry['Confirmed'].values[0]), 'INR', locale='en_IN')[
+                                    1:-3] + '\n(+' + format_currency(int(self.df_daily[self.df_daily['Status'] == 'Confirmed'][self.mapp[state]]), 'INR', locale='en_IN')[1:-3] + ')', inline=False)
+                    embed.add_field(name='Recovered', value=format_currency(int(entry['Recovered'].values[0]), 'INR', locale='en_IN')[
+                                    1:-3] + '\n(+' + format_currency(int(self.df_daily[self.df_daily['Status'] == 'Recovered'][self.mapp[state]]), 'INR', locale='en_IN')[1:-3] + ')', inline=False)
+                    embed.add_field(name='Deaths', value=format_currency(int(entry['Deaths'].values[0]), 'INR', locale='en_IN')[
+                                    1:-3] + '\n(+' + format_currency(int(self.df_daily[self.df_daily['Status'] == 'Deceased'][self.mapp[state]]), 'INR', locale='en_IN')[1:-3] + ')', inline=False)
+                    embed.set_footer(text=self.footer)
+                    await ctx.send(embed=embed)
     
     @commands.command(aliases=['india'])
     async def india_command(self, ctx):
@@ -127,6 +159,23 @@ class Data(commands.Cog):
                         1:-3] + '\n(+' + format_currency(int(self.df_daily[self.df_daily['Status'] == 'Deceased'][self.mapp['total']]), 'INR', locale='en_IN')[1:-3] + ')', inline=False)
         embed.set_footer(text=self.footer)
         await ctx.send(embed=embed)
+
+    @cog_ext.cog_slash(name='india', description='Stats of COVID-19 in India')
+    async def india_slash(self, ctx):
+        await ctx.defer()
+        entry = self.df.loc[self.df['State'] == 'total']
+        embed = discord.Embed(title="Cases in the Country",
+                            color=discord.Color.green())
+        embed.add_field(name='Active', value=format_currency(
+            int(entry['Active'].values[0]), 'INR', locale='en_IN')[1:-3], inline=False)
+        embed.add_field(name='Confirmed', value=format_currency(int(entry['Confirmed'].values[0]), 'INR', locale='en_IN')[
+                        1:-3] + '\n(+' + format_currency(int(self.df_daily[self.df_daily['Status'] == 'Confirmed'][self.mapp['total']]), 'INR', locale='en_IN')[1:-3] + ')', inline=False)
+        embed.add_field(name='Recovered', value=format_currency(int(entry['Recovered'].values[0]), 'INR', locale='en_IN')[
+                        1:-3] + '\n(+' + format_currency(int(self.df_daily[self.df_daily['Status'] == 'Recovered'][self.mapp['total']]), 'INR', locale='en_IN')[1:-3] + ')', inline=False)
+        embed.add_field(name='Deaths', value=format_currency(int(entry['Deaths'].values[0]), 'INR', locale='en_IN')[
+                        1:-3] + '\n(+' + format_currency(int(self.df_daily[self.df_daily['Status'] == 'Deceased'][self.mapp['total']]), 'INR', locale='en_IN')[1:-3] + ')', inline=False)
+        embed.set_footer(text=self.footer)
+        await ctx.send(embeds=[embed])
 
     @commands.command(aliases=['states'])
     async def states_command(self, ctx, text=''):

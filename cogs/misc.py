@@ -1,6 +1,7 @@
-import json
 import discord
 from discord.ext import commands
+from discord_slash import cog_ext
+import json
 from helpers import Helpers
 
 class Misc(commands.Cog):
@@ -75,6 +76,32 @@ class Misc(commands.Cog):
             ), description='`.help` does not take any arguments.\n**Syntax:** `.help`')
             await ctx.send(embed=embed)
 
+    @cog_ext.cog_slash(name="help", description="Commands available from me")
+    async def help_slash(self, ctx):
+        await ctx.defer()
+        help_embed = discord.Embed(title="**Help**", color=discord.Color.green())
+        help_embed.add_field(
+            name='**`.india`**', value='Get COVID-19 stats of the entire nation', inline=False)
+        help_embed.add_field(name='**`.states`**',
+                            value='Get a list of states', inline=False)
+        help_embed.add_field(
+            name='**`.state {state}`**', value='Get cases in that particular state', inline=False)
+        help_embed.add_field(
+            name='**`.vaccine {pincode} [date]`**', value='Get vaccination slots near you. If `date` is not mentioned, it will take today\'s date', inline=False)
+        help_embed.add_field(name='**`.beds {type of hospital}`**',
+                            value='Get available beds. Type can be `government/govt` or `private`(Only Bengaluru)', inline=False)
+        help_embed.add_field(name='**`.alerts {channel name}`**',
+                            value='(only for members with \"Manage Server\" permissions) To register any channel on your server to get important alerts from the developers', inline=False)
+        help_embed.add_field(name='**`.removealerts`**',
+                            value='(only for members with \"Manage Server\" permissions) To de-register any channel that was registered for alerts', inline=False)
+        help_embed.add_field(name='**`.invite`**',
+                            value='Get the invite link of the bot', inline=False)
+        help_embed.add_field(name='**`.contribute`**',
+                            value='If you wish to contribute or learn about the bot', inline=False)
+        help_embed.add_field(name='**`.reachout`**',
+                            value='(only for Server Administrators) To reach out to the bot developers', inline=False)
+        await ctx.send(embeds=[help_embed])
+
     @commands.command(aliases=['removealerts'])
     async def removealerts_command(self, ctx, dest: discord.TextChannel = None):
         found = False
@@ -83,7 +110,7 @@ class Misc(commands.Cog):
             return
         auth_perms = ctx.channel.permissions_for(ctx.author)
         if(auth_perms.manage_guild):
-            fp = open('alerts.csv', 'r')
+            fp = open('data\\alerts.csv', 'r')
             for line1 in fp:
                 if(str(dest.id) in str(line1.split(',')[1].rstrip('\n'))):
                     fp.close()
@@ -96,12 +123,12 @@ class Misc(commands.Cog):
                 fp.close()
                 return
             dat = ''
-            fp = open('alerts.csv', 'r')
+            fp = open('data\\alerts.csv', 'r')
             for line1 in fp:
                 if(str(dest.id) not in str(line1.split(',')[1].rstrip('\n'))):
                     dat += line1
             fp.close()
-            fp = open('alerts.csv', 'w')
+            fp = open('data\\alerts.csv', 'w')
             fp.write(dat)
             fp.close()
             await ctx.send(f"**DONE**. {dest.mention} will no longer receive alerts and updates from the developers")
@@ -128,7 +155,7 @@ class Misc(commands.Cog):
             return
         auth_perms = ctx.channel.permissions_for(ctx.author)
         if(auth_perms.manage_guild):
-            file1 = open('alerts.csv', 'r')
+            file1 = open('data\\alerts.csv', 'r')
             for line in file1:
                 if(str(dest.id) in str(line.split(',')[1].rstrip('\n'))):
                     await ctx.send(f"Looks like {dest.mention} is already subscribed to our alerts")
@@ -137,7 +164,7 @@ class Misc(commands.Cog):
             client_member = ctx.guild.get_member(836578128305717279)
             client_perms = client_member.permissions_in(dest)
             if(client_perms.send_messages and client_perms.embed_links):
-                file1 = open('alerts.csv', 'a')
+                file1 = open('data\\alerts.csv', 'a')
                 file1.write(f"{ctx.guild.id},{dest.id}\n")
                 file1.close()
                 await ctx.send(f"**Success!** You'll now get vaccine slot alerts in Bengaluru and other important notifications from the bot on {dest.mention}")
@@ -152,7 +179,7 @@ class Misc(commands.Cog):
         found = False
         pincheck = Helpers.pincodecheckbangalore(str(pincode))
         if pincheck:
-            with open('alerts.csv', 'r') as fp:
+            with open('data\\alerts.csv', 'r') as fp:
                 for line in fp:
                     if(str(ctx.guild.id) in line.split(',')[0]):
                         found = True
@@ -160,7 +187,7 @@ class Misc(commands.Cog):
                 await ctx.send("Looks like your server isn't set up for vaccine alerts at all.\nContact your server moderators and ask them to run the `.alerts` command and then try again")
                 fp.close()
                 return
-            fp = open('mypings.json', 'r')
+            fp = open('data\\mypings.json', 'r')
             data = json.load(fp)
             fp.close()
             user_id = str(ctx.author.id)
@@ -173,7 +200,7 @@ class Misc(commands.Cog):
                     return
             subdict[user_id] = guild_id
             data[str(pincode)] = subdict
-            fp = open('mypings.json', 'w')
+            fp = open('data\\mypings.json', 'w')
             json.dump(data, fp)
             fp.close()
             await ctx.send(f"You'll now get a ping every time there's a slot open in pincode: **{pincode}**")
@@ -185,7 +212,7 @@ class Misc(commands.Cog):
         await ctx.channel.trigger_typing()
         pincheck = Helpers.pincodecheckbangalore(str(pincode))
         if pincheck:
-            fp = open('mypings.json', 'r')
+            fp = open('data\\mypings.json', 'r')
             data = json.load(fp)
             fp.close()
             user_id = str(ctx.author.id)
@@ -196,7 +223,7 @@ class Misc(commands.Cog):
                 await ctx.send(f"No record of pincode: **{pincode}** was found in our database")
                 return
             data[str(pincode)] = subdict
-            fp = open('mypings.json', 'w')
+            fp = open('data\\mypings.json', 'w')
             json.dump(data, fp)
             fp.close()
             await ctx.send(f"Alright, no more pings for pincode: **{pincode}**")
@@ -205,7 +232,7 @@ class Misc(commands.Cog):
 
     @commands.command(aliases=['lp', 'listpings'])
     async def pinglist(self, ctx):
-        fp = open('mypings.json', 'r')
+        fp = open('data\\mypings.json', 'r')
         data = json.load(fp)
         fp.close()
         user_id = str(ctx.author.id)

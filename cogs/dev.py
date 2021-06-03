@@ -10,11 +10,11 @@ class Dev(commands.Cog):
     async def file_command(self, ctx):
         if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872) or (ctx.author.id == 771985293011058708)):
             await ctx.send("You have clearance")
-            with open('alerts.csv', 'r') as fp:
-                await self.client.get_channel(841561036305465344).send(file=discord.File(fp, 'alerts.csv'))
+            with open('data\\alerts.csv', 'r') as fp:
+                await self.client.get_channel(841561036305465344).send(file=discord.File(fp, 'data\\alerts.csv'))
             fp.close()
-            with open('mypings.json', 'r') as fp:
-                await self.client.get_channel(841561036305465344).send(file=discord.File(fp, 'mypings.csv'))
+            with open('data\\mypings.json', 'r') as fp:
+                await self.client.get_channel(841561036305465344).send(file=discord.File(fp, 'data\\mypings.csv'))
             fp.close()
         else:
             await ctx.send("You are not authorised to run this command")
@@ -45,7 +45,7 @@ class Dev(commands.Cog):
             if(msg == ''):
                 await ctx.send("Put a message man")
                 return
-            fp = open('alerts.csv', 'r')
+            fp = open('data\\alerts.csv', 'r')
             ch_list = [line.split(',')[1] for line in list(
                 filter(None, fp.read().split('\n')))]
             for ch in ch_list:
