@@ -697,10 +697,8 @@ async def alert():
             headers = {"Accept-Language": "en-IN",
                        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
             data = {"district_id": j, "date": i}
-            if(j == 294):
-                res = requests.get(url,  params=data)
-            else:
-                res = requests.get(url, params=data)
+
+            res = requests.get(url,  params=data)
             #resp = res.json()
             # print(res.json())
             #print(res.status_code, j)
