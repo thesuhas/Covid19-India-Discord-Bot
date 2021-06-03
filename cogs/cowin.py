@@ -6,6 +6,7 @@ import requests
 import datetime
 import os
 from cogs import helpers
+import pytz
 
 
 class Cowin(commands.Cog):
@@ -14,19 +15,18 @@ class Cowin(commands.Cog):
         self.client = client
         self.s_id = []
 
-
         # URLs
         self.url1 = os.getenv('url1')
         self.url2 = os.getenv('url2')
         self.url3 = os.getenv('url3')
         self.url = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict"
-
+        self.IST = pytz.timezone('Asia/Kolkata')
 
     @commands.Cog.listener()
     async def on_ready(self):
         self.clear.start()
         self.alert.start()
-    
+
     @commands.command(aliases=['vaccine'])
     async def vaccine_command(self, ctx, pincode="", date=datetime.datetime.now().strftime("%d-%m-%Y")):
         # If no pincode given
@@ -35,7 +35,7 @@ class Cowin(commands.Cog):
             await ctx.send("Invalid pincode, try again")
         else:
             headers = {"Accept-Language": "en-IN",
-                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
+                       'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
             data = {"pincode": pincode, "date": date}
             res = requests.get(
                 "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin", headers=headers, params=data)
@@ -56,10 +56,13 @@ class Cowin(commands.Cog):
                         if j['available_capacity'] >= 1:
                             # Check if hospital exists
                             if (i['name'], i['pincode'], i['fee_type'], i['address']) in sessions:
-                                sessions[(i['name'], i['pincode'], i['fee_type'], i['address'])].append(j)
+                                sessions[(i['name'], i['pincode'],
+                                          i['fee_type'], i['address'])].append(j)
                             else:
-                                sessions[(i['name'], i['pincode'], i['fee_type'], i['address'])] = list()
-                                sessions[(i['name'], i['pincode'], i['fee_type'], i['address'])].append(j)
+                                sessions[(i['name'], i['pincode'],
+                                          i['fee_type'], i['address'])] = list()
+                                sessions[(i['name'], i['pincode'],
+                                          i['fee_type'], i['address'])].append(j)
                 if len(sessions) == 0:
                     await ctx.send("No available sessions")
                 else:
@@ -69,9 +72,9 @@ class Cowin(commands.Cog):
                             title=f"Vaccine Available at {sesh[0]}", color=discord.Color.green())
                         embed.add_field(name='Date', value=date, inline=False)
                         embed.add_field(
-                                name='Address', value=sesh[3], inline=False)
+                            name='Address', value=sesh[3], inline=False)
                         embed.add_field(
-                                name='Pin Code', value=sesh[1], inline=False)
+                            name='Pin Code', value=sesh[1], inline=False)
                         embed.add_field(
                             name='Available Capacity for Dose 1', value=sessions[sesh][0]['available_capacity_dose1'], inline=False)
                         embed.add_field(
@@ -81,7 +84,7 @@ class Cowin(commands.Cog):
                         embed.add_field(
                             name='Vaccine', value=sessions[sesh][0]['vaccine'])
                         embed.add_field(
-                                name='Fee type', value=sesh[2], inline=False)
+                            name='Fee type', value=sesh[2], inline=False)
                         embed.add_field(name="Slots", value='\n'.join(
                             sessions[sesh][0]['slots']), inline=False)
                         await ctx.send(embed=embed)
@@ -97,7 +100,7 @@ class Cowin(commands.Cog):
             await ctx.send("Invalid pincode, try again")
         else:
             headers = {"Accept-Language": "en-IN",
-                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
+                       'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
             data = {"pincode": pincode, "date": date}
             res = requests.get(
                 "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin", headers=headers, params=data)
@@ -121,12 +124,12 @@ class Cowin(commands.Cog):
                             # Check if hospital exists
                             if i['name'] in sessions:
                                 sessions[(i['name'], i['pincode'],
-                                        i['fee_type'], i['address'])].append(j)
+                                          i['fee_type'], i['address'])].append(j)
                             else:
                                 sessions[(i['name'], i['pincode'],
-                                        i['fee_type'], i['address'])] = list()
+                                          i['fee_type'], i['address'])] = list()
                                 sessions[(i['name'], i['pincode'],
-                                        i['fee_type'], i['address'])].append(j)
+                                          i['fee_type'], i['address'])].append(j)
                 if len(sessions) == 0:
                     await ctx.send("No available sessions")
                 else:
@@ -157,10 +160,16 @@ class Cowin(commands.Cog):
 
     @tasks.loop(seconds=4)
     async def alert(self):
-        date = datetime.datetime.now().strftime("%d-%m-%Y")
-        datetom = (datetime.datetime.now() +
-                datetime.timedelta(days=1)).strftime("%d-%m-%Y")
-        dates = [date, datetom]
+        date = datetime.datetime.now(self.IST).strftime("%d-%m-%Y")
+        datetom = (datetime.datetime.now(self.IST) +
+                   datetime.timedelta(days=1)).strftime("%d-%m-%Y")
+        dateafter = (datetime.datetime.now(self.IST) +
+                     datetime.timedelta(days=2)).strftime("%d-%m-%Y")
+        if(datetime.datetime.now(self.IST).hour < 16):
+            dates = [date, datetom]
+        if(datetime.datetime.now(self.IST).hour >= 16):
+            dates = [datetom, dateafter]
+        #dates = [date, datetom]
         d_ids = [276, 265, 294]
         for j in d_ids:
             if(j == 276):
@@ -171,11 +180,11 @@ class Cowin(commands.Cog):
                 url = self.url3
             for i in dates:
                 headers = {"Accept-Language": "en-IN",
-                        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
+                           'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
                 data = {"district_id": j, "date": i}
                 res = requests.get(url, params=data)
                 #resp = res.json()
-                #print(res.json())
+                # print(res.json())
                 #print(res.status_code, j)
                 if(res.status_code == 200):
                     resp = res.json()
