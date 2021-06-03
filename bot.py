@@ -22,7 +22,9 @@ client.remove_command('help')
 
 # load the env variable token
 load_dotenv()
-
+url1 = os.getenv("url1")
+url2 = os.getenv("url1")
+url3 = os.getenv("url3")
 # Saving file name
 filename = 'states.csv'
 file_daily = "states_yesterday.csv"
@@ -526,7 +528,7 @@ async def vaccine_slash(ctx, pincode="", date=datetime.datetime.now().strftime("
                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
         data = {"pincode": pincode, "date": date}
         res = requests.get(
-            "http://65.0.131.189:5000/covid", params=data)
+            "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin", headers=headers, params=data)
         # if res.status_code == 400:
         #     await ctx.send("Invalid pincode")
         #     return
@@ -676,7 +678,7 @@ async def update():
     footer = f"Last Updated: {time}"
 
 
-@tasks.loop(seconds=10)
+@tasks.loop(seconds=7)
 async def alert():
     global s_id
     date = datetime.datetime.now().strftime("%d-%m-%Y")
@@ -686,17 +688,17 @@ async def alert():
     d_ids = [276, 265, 294]
     for j in d_ids:
         if(j == 276):
-            url = os.getenv("url1")
+            url = url1
         if(j == 265):
-            url = os.getenv("url2")
+            url = url2
         if(j == 294):
-            url = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict"
+            url = url3
         for i in dates:
             headers = {"Accept-Language": "en-IN",
                        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
             data = {"district_id": j, "date": i}
             if(j == 294):
-                res = requests.get(url, headers=headers, params=data)
+                res = requests.get(url,  params=data)
             else:
                 res = requests.get(url, params=data)
             #resp = res.json()
@@ -706,54 +708,59 @@ async def alert():
                 resp = res.json()
                 for k in resp['sessions']:
                     if(len(k) != 0):
-                        if(math.trunc(k['available_capacity_dose1']) >= 8 and k['min_age_limit'] == 18 and ((k['available_capacity_dose1'])-int(k['available_capacity_dose1'])) == 0 and k['session_id'] not in s_id):
-                            embed = discord.Embed(
-                                title=f"Vaccine Available at {k['name']}", color=discord.Color.green())
-                            embed.add_field(
-                                name='Date', value=k['date'], inline=False)
-                            embed.add_field(
-                                name='Vaccine', value=k['vaccine'])
-                            embed.add_field(
-                                name='Address', value=k['address'], inline=False)
-                            embed.add_field(
-                                name='Pincode', value=k['pincode'], inline=False)
-                            embed.add_field(
-                                name='Available Capacity for Dose 1', value=k['available_capacity_dose1'], inline=False)
-                            embed.add_field(
-                                name='Available Capacity for Dose 2', value=k['available_capacity_dose2'], inline=False)
-                            embed.add_field(
-                                name='Minimum Age', value=k['min_age_limit'], inline=False)
-                            embed.add_field(
-                                name='Fee type', value=k['fee_type'], inline=False)
-                            embed.add_field(name="Slots", value='\n'.join(
-                                k['slots']), inline=False)
-                            s_id.append(str(k['session_id']))
-                            fp = open('alerts.csv', 'r')
-                            fp2 = open('mypings.json', 'r')
-                            data = json.load(fp2)
-                            fp2.close()
-                            ch_list = [line.split(',')[1] for line in list(
-                                filter(None, fp.read().split('\n')))]
-                            for ch in ch_list:
-                                try:
-                                    await client.get_channel(int(ch)).send(embed=embed)
-                                except:
-                                    continue
-                                try:
-                                    guild_id = str(
-                                        client.get_channel(int(ch)).guild.id)
-                                    if(str(k['pincode']) in data):
-                                        id_dict = data[str(k['pincode'])]
-                                        for uid in id_dict:
-                                            if(guild_id in str(id_dict[uid])):
-                                                member_id = int(uid)
-                                                memberMention = client.get_user(
-                                                    member_id).mention
-                                                await client.get_channel(int(ch)).send(memberMention)
-                                except:
-                                    continue
-                            # await client.get_channel(841561036305465344).send(embed=embed)
-                            fp.close()
+                        # if(math.trunc(k['available_capacity_dose1']) >= 8 and k['min_age_limit'] == 18 and ((k['available_capacity_dose1'])-int(k['available_capacity_dose1'])) == 0 and k['session_id'] not in s_id):
+                        embed = discord.Embed(
+                            title=f"Vaccine Available at {k['name']}", color=discord.Color.green())
+                        embed.add_field(
+                            name='Date', value=k['date'], inline=False)
+                        embed.add_field(
+                            name='Vaccine', value=k['vaccine'])
+                        embed.add_field(
+                            name='Address', value=k['address'], inline=False)
+                        embed.add_field(
+                            name='Pincode', value=k['pincode'], inline=False)
+                        embed.add_field(
+                            name='Available Capacity for Dose 1', value=k['available_capacity_dose1'], inline=False)
+                        embed.add_field(
+                            name='Available Capacity for Dose 2', value=k['available_capacity_dose2'], inline=False)
+                        embed.add_field(
+                            name='Minimum Age', value=k['min_age_limit'], inline=False)
+                        if(k['fee_type'] == 'Paid'):
+                            embed.add_field(name='Fee type', value=str(
+                                k['fee_type'])+str(k['fee']), inline=False)
+                        else:
+                            embed.add_field(name='Fee type', value=str(
+                                k['fee_type']), inline=False)
+
+                        embed.add_field(name="Slots", value='\n'.join(
+                            k['slots']), inline=False)
+                        s_id.append(str(k['session_id']))
+                        fp = open('alerts.csv', 'r')
+                        fp2 = open('mypings.json', 'r')
+                        data = json.load(fp2)
+                        fp2.close()
+                        ch_list = [line.split(',')[1] for line in list(
+                            filter(None, fp.read().split('\n')))]
+                        for ch in ch_list:
+                            try:
+                                await client.get_channel(int(ch)).send(embed=embed)
+                            except:
+                                continue
+                            try:
+                                guild_id = str(
+                                    client.get_channel(int(ch)).guild.id)
+                                if(str(k['pincode']) in data):
+                                    id_dict = data[str(k['pincode'])]
+                                    for uid in id_dict:
+                                        if(guild_id in str(id_dict[uid])):
+                                            member_id = int(uid)
+                                            memberMention = client.get_user(
+                                                member_id).mention
+                                            await client.get_channel(int(ch)).send(memberMention)
+                            except:
+                                continue
+                        # await client.get_channel(841561036305465344).send(embed=embed)
+                        fp.close()
                     else:
                         continue
             else:
