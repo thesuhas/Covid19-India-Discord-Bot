@@ -23,7 +23,7 @@ client.remove_command('help')
 # load the env variable token
 load_dotenv()
 url1 = os.getenv("url1")
-url2 = os.getenv("url1")
+url2 = os.getenv("url2")
 url3 = os.getenv("url3")
 # Saving file name
 filename = 'states.csv'
