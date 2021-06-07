@@ -6,7 +6,6 @@ import requests
 from babel.numbers import format_currency
 import datetime
 import io
-from cogs import cowin
 
 class Data(commands.Cog):
     # Initialisation command

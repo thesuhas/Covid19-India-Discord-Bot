@@ -41,7 +41,7 @@ class Events(commands.Cog):
         fp = open('data/alerts.csv', 'w')
         fp.write(dat)
         fp.close()
-        Cowin.updatecsvdata()
+        Cowin.updatecsvdata(Cowin)
 
         fp = open('data/mypings.json', 'r')
         data = json.load(fp)
@@ -59,7 +59,7 @@ class Events(commands.Cog):
         fp = open('data/mypings.json', 'w')
         json.dump(new_data, fp)
         fp.close()
-        Cowin.updatejsondata()
+        Cowin.updatejsondata(Cowin)
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -92,7 +92,7 @@ class Events(commands.Cog):
         fp = open('data/mypings.json', 'w')
         json.dump(new_data, fp)
         fp.close()
-        Cowin.updatejsondata()
+        Cowin.updatejsondata(Cowin)
 
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel):
@@ -107,7 +107,7 @@ class Events(commands.Cog):
         fp = open('data/alerts.csv', 'w')
         fp.write(dat)
         fp.close()
-        Cowin.updatecsvdata()
+        Cowin.updatecsvdata(Cowin)
 
 
 def setup(client):

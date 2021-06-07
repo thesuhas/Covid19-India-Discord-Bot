@@ -5,7 +5,7 @@ from discord_slash import cog_ext
 import requests
 import datetime
 import os
-from cogs import helpers
+from cogs.helpers import Helpers
 import pytz
 
 
@@ -22,25 +22,19 @@ class Cowin(commands.Cog):
         self.url = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict"
         self.IST = pytz.timezone('Asia/Kolkata')
         
-        #File data
-        fp = open('data/alerts.csv', 'r')
-        self.ch_list = [line.split(',')[1] for line in list(filter(None, fp.read().split('\n')))]
-        fp.close()
-
-        fp = open('data/mypings.json', 'r')
-        self.data = json.load(fp)
-        fp.close()
 
 
     @commands.Cog.listener()
     async def on_ready(self):
+        self.updatecsvdata()
+        self.updatejsondata()
         self.clear.start()
         self.alert.start()
 
     @commands.command(aliases=['vaccine'])
     async def vaccine_command(self, ctx, pincode="", date=datetime.datetime.now().strftime("%d-%m-%Y")):
         # If no pincode given
-        pincheck = helpers.Helpers.pincodecheckindia(pincode)
+        pincheck = Helpers.pincodecheckindia(pincode)
         if not pincheck:
             await ctx.send("Invalid pincode, try again")
         else:
@@ -105,7 +99,7 @@ class Cowin(commands.Cog):
     async def vaccine_slash(self, ctx, pincode="", date=datetime.datetime.now().strftime("%d-%m-%Y")):
         await ctx.defer()
         # If no pincode given
-        pincheck = helpers.Helpers.pincodecheckindia(pincode)
+        pincheck = Helpers.pincodecheckindia(pincode)
         if not pincheck:
             await ctx.send("Invalid pincode, try again")
         else:
