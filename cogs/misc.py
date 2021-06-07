@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from discord_slash import cog_ext
 import json
-from cogs import helpers
+from cogs.helpers import Helpers
 from cogs.cowin import Cowin
 
 class Misc(commands.Cog):
@@ -133,7 +133,7 @@ class Misc(commands.Cog):
             fp.write(dat)
             fp.close()
             await ctx.send(f"**DONE**. {dest.mention} will no longer receive alerts and updates from the developers")
-            Cowin.updatecsvdata()
+            Cowin.updatecsvdata(Cowin)
         else:
             await ctx.send("Looks like you don't have the manage server permissions to run this")
 
@@ -170,7 +170,7 @@ class Misc(commands.Cog):
                 file1.write(f"{ctx.guild.id},{dest.id}\n")
                 file1.close()
                 await ctx.send(f"**Success!** You'll now get vaccine slot alerts in Bengaluru and other important notifications from the bot on {dest.mention}")
-                Cowin.updatecsvdata()
+                Cowin.updatecsvdata(Cowin)
             else:
                 await ctx.send("I don't have enough permissions in that channel. Enable `Send Messages`, `Embed Links` and `Attach Files` for me")
         else:
@@ -180,7 +180,7 @@ class Misc(commands.Cog):
     async def personalpingcommand(self, ctx, pincode: int = 0):
         await ctx.channel.trigger_typing()
         found = False
-        pincheck = helpers.Helpers.pincodecheckbangalore(str(pincode))
+        pincheck = Helpers.pincodecheckbangalore(str(pincode))
         if pincheck:
             with open('data/alerts.csv', 'r') as fp:
                 for line in fp:
@@ -206,7 +206,7 @@ class Misc(commands.Cog):
             fp = open('data/mypings.json', 'w')
             json.dump(data, fp)
             fp.close()
-            Cowin.updatejsondata()
+            Cowin.updatejsondata(Cowin)
             await ctx.send(f"You'll now get a ping every time there's a slot open in pincode: **{pincode}**")
         else:
             await ctx.send("Pincode invalid, try again")
@@ -214,7 +214,7 @@ class Misc(commands.Cog):
     @commands.command(aliases=['rp', 'removeping'])
     async def removepingcommand(self, ctx, pincode: int = 0):
         await ctx.channel.trigger_typing()
-        pincheck = helpers.Helpers.pincodecheckbangalore(str(pincode))
+        pincheck = Helpers.pincodecheckbangalore(str(pincode))
         if pincheck:
             fp = open('data/mypings.json', 'r')
             data = json.load(fp)
@@ -230,7 +230,7 @@ class Misc(commands.Cog):
             fp = open('data/mypings.json', 'w')
             json.dump(data, fp)
             fp.close()
-            Cowin.updatejsondata()
+            Cowin.updatejsondata(Cowin)
             await ctx.send(f"Alright, no more pings for pincode: **{pincode}**")
         else:
             await ctx.send("Pincode invalid, try again")
