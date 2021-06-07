@@ -160,6 +160,7 @@ class Cowin(commands.Cog):
 
     @tasks.loop(seconds=4)
     async def alert(self):
+        dates = []
         date = datetime.datetime.now(self.IST).strftime("%d-%m-%Y")
         datetom = (datetime.datetime.now(self.IST) +
                    datetime.timedelta(days=1)).strftime("%d-%m-%Y")
