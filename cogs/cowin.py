@@ -21,6 +21,16 @@ class Cowin(commands.Cog):
         self.url3 = os.getenv('url3')
         self.url = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict"
         self.IST = pytz.timezone('Asia/Kolkata')
+        
+        #File data
+        fp = open('data/alerts.csv', 'r')
+        self.ch_list = [line.split(',')[1] for line in list(filter(None, fp.read().split('\n')))]
+        fp.close()
+
+        fp = open('data/mypings.json', 'r')
+        self.data = json.load(fp)
+        fp.close()
+
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -160,6 +170,7 @@ class Cowin(commands.Cog):
 
     @tasks.loop(seconds=4)
     async def alert(self):
+        dates = []
         date = datetime.datetime.now(self.IST).strftime("%d-%m-%Y")
         datetom = (datetime.datetime.now(self.IST) +
                    datetime.timedelta(days=1)).strftime("%d-%m-%Y")
@@ -196,6 +207,8 @@ class Cowin(commands.Cog):
                             embed.add_field(
                                 name='Date', value=k['date'], inline=False)
                             embed.add_field(
+                                name='Vaccine', value=k['vaccine'])
+                            embed.add_field(
                                 name='Address', value=k['address'], inline=False)
                             embed.add_field(
                                 name='Pincode', value=k['pincode'], inline=False)
@@ -205,8 +218,6 @@ class Cowin(commands.Cog):
                                 name='Available Capacity for Dose 2', value=k['available_capacity_dose2'], inline=False)
                             embed.add_field(
                                 name='Minimum Age', value=k['min_age_limit'], inline=False)
-                            embed.add_field(
-                                name='Vaccine', value=k['vaccine'])
                             if(k['fee_type'] == 'Paid'):
                                 embed.add_field(name='Fee type', value=str(
                                     k['fee_type'])+'-Rs.'+str(k['fee']), inline=False)
@@ -216,13 +227,11 @@ class Cowin(commands.Cog):
                             embed.add_field(name="Slots", value='\n'.join(
                                 k['slots']), inline=False)
                             self.s_id.append(str(k['session_id']))
-                            fp = open('data/alerts.csv', 'r')
-                            fp2 = open('data/mypings.json', 'r')
-                            data = json.load(fp2)
-                            fp2.close()
-                            ch_list = [line.split(',')[1] for line in list(
-                                filter(None, fp.read().split('\n')))]
-                            for ch in ch_list:
+                            if(str(k['pincode']) in self.data):
+                                id_dict = self.data[str(k['pincode'])]
+                            else:
+                                id_dict = {} #just to avoid name error in line 244
+                            for ch in self.ch_list:
                                 try:
                                     await self.client.get_channel(int(ch)).send(embed=embed)
                                 except:
@@ -230,18 +239,17 @@ class Cowin(commands.Cog):
                                 try:
                                     guild_id = str(
                                         self.client.get_channel(int(ch)).guild.id)
-                                    if(str(k['pincode']) in data):
-                                        id_dict = data[str(k['pincode'])]
-                                        for uid in id_dict:
-                                            if(guild_id in str(id_dict[uid])):
-                                                member_id = int(uid)
-                                                memberMention = self.client.get_user(
-                                                    member_id).mention
-                                                await self.client.get_channel(int(ch)).send(memberMention)
+                                    # if(str(k['pincode']) in self.data):
+                                    #     id_dict = self.data[str(k['pincode'])]
+                                    for uid in id_dict:
+                                        if(guild_id in str(id_dict[uid])):
+                                            member_id = int(uid)
+                                            memberMention = self.client.get_user(
+                                                member_id).mention
+                                            await self.client.get_channel(int(ch)).send(memberMention)
                                 except:
                                     continue
                             # await client.get_channel(841561036305465344).send(embed=embed)
-                            fp.close()
                         else:
                             continue
                 else:
@@ -252,6 +260,17 @@ class Cowin(commands.Cog):
     async def clear(self):
         self.s_id = []
         return
+
+    def updatecsvdata(self):
+        fp = open('data/alerts.csv', 'r')
+        self.ch_list = [line.split(',')[1] for line in list(filter(None, fp.read().split('\n')))]
+        fp.close()
+
+    def updatejsondata(self):
+        fp = open('data/mypings.json', 'r')
+        self.data = json.load(fp)
+        fp.close()
+
 
 
 def setup(client):

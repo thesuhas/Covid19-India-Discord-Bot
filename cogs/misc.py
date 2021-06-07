@@ -3,6 +3,7 @@ from discord.ext import commands
 from discord_slash import cog_ext
 import json
 from cogs import helpers
+from cogs.cowin import Cowin
 
 class Misc(commands.Cog):
     # Initialisation
@@ -132,6 +133,7 @@ class Misc(commands.Cog):
             fp.write(dat)
             fp.close()
             await ctx.send(f"**DONE**. {dest.mention} will no longer receive alerts and updates from the developers")
+            Cowin.updatecsvdata()
         else:
             await ctx.send("Looks like you don't have the manage server permissions to run this")
 
@@ -163,13 +165,14 @@ class Misc(commands.Cog):
                     return
             client_member = ctx.guild.get_member(836578128305717279)
             client_perms = client_member.permissions_in(dest)
-            if(client_perms.send_messages and client_perms.embed_links):
+            if(client_perms.send_messages and client_perms.embed_links and client_perms.attach_files):
                 file1 = open('data/alerts.csv', 'a')
                 file1.write(f"{ctx.guild.id},{dest.id}\n")
                 file1.close()
                 await ctx.send(f"**Success!** You'll now get vaccine slot alerts in Bengaluru and other important notifications from the bot on {dest.mention}")
+                Cowin.updatecsvdata()
             else:
-                await ctx.send("I don't have enough permissions in that channel. Enable `Send Messages` and `Embed Links` for me")
+                await ctx.send("I don't have enough permissions in that channel. Enable `Send Messages`, `Embed Links` and `Attach Files` for me")
         else:
             await ctx.send("Looks like you don't have the manage server permissions to run this")
 
@@ -203,6 +206,7 @@ class Misc(commands.Cog):
             fp = open('data/mypings.json', 'w')
             json.dump(data, fp)
             fp.close()
+            Cowin.updatejsondata()
             await ctx.send(f"You'll now get a ping every time there's a slot open in pincode: **{pincode}**")
         else:
             await ctx.send("Pincode invalid, try again")
@@ -226,6 +230,7 @@ class Misc(commands.Cog):
             fp = open('data/mypings.json', 'w')
             json.dump(data, fp)
             fp.close()
+            Cowin.updatejsondata()
             await ctx.send(f"Alright, no more pings for pincode: **{pincode}**")
         else:
             await ctx.send("Pincode invalid, try again")
