@@ -5,7 +5,7 @@ from discord_slash import cog_ext
 import requests
 import datetime
 import os
-from cogs import helpers
+from cogs.helpers import Helpers
 import pytz
 
 
@@ -24,13 +24,15 @@ class Cowin(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
+        self.updatecsvdata()
+        self.updatejsondata()
         self.clear.start()
         self.alert.start()
 
     @commands.command(aliases=['vaccine'])
     async def vaccine_command(self, ctx, pincode="", date=datetime.datetime.now().strftime("%d-%m-%Y")):
         # If no pincode given
-        pincheck = helpers.Helpers.pincodecheckindia(pincode)
+        pincheck = Helpers.pincodecheckindia(pincode)
         if not pincheck:
             await ctx.send("Invalid pincode, try again")
         else:
@@ -95,7 +97,7 @@ class Cowin(commands.Cog):
     async def vaccine_slash(self, ctx, pincode="", date=datetime.datetime.now().strftime("%d-%m-%Y")):
         await ctx.defer()
         # If no pincode given
-        pincheck = helpers.Helpers.pincodecheckindia(pincode)
+        pincheck = Helpers.pincodecheckindia(pincode)
         if not pincheck:
             await ctx.send("Invalid pincode, try again")
         else:
@@ -158,101 +160,113 @@ class Cowin(commands.Cog):
             else:
                 await ctx.send("No available vaccination center")
 
-    @tasks.loop(seconds=4)
+    @tasks.loop(seconds=3)
     async def alert(self):
-        dates = []
-        date = datetime.datetime.now(self.IST).strftime("%d-%m-%Y")
-        datetom = (datetime.datetime.now(self.IST) +
-                   datetime.timedelta(days=1)).strftime("%d-%m-%Y")
-        dateafter = (datetime.datetime.now(self.IST) +
-                     datetime.timedelta(days=2)).strftime("%d-%m-%Y")
-        if(datetime.datetime.now(self.IST).hour < 16):
-            dates = [date, datetom]
-        if(datetime.datetime.now(self.IST).hour >= 16):
-            dates = [datetom, dateafter]
-        #dates = [date, datetom]
-        d_ids = [276, 265, 294]
-        for j in d_ids:
-            if(j == 276):
-                url = self.url1
-            if(j == 265):
-                url = self.url2
-            if(j == 294):
-                url = self.url3
-            for i in dates:
-                headers = {"Accept-Language": "en-IN",
-                           'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
-                data = {"district_id": j, "date": i}
-                res = requests.get(url, params=data)
-                #resp = res.json()
-                # print(res.json())
-                #print(res.status_code, j)
-                if(res.status_code == 200):
-                    resp = res.json()
-                    for k in resp['sessions']:
-                        if(len(k) != 0 and k['session_id'] not in self.s_id):
-                            # if(math.trunc(k['available_capacity_dose1']) >= 8 and k['min_age_limit'] == 18 and ((k['available_capacity_dose1'])-int(k['available_capacity_dose1'])) == 0 and (k['session_id'] not in self.s_id)):
-                            embed = discord.Embed(
-                                title=f"Vaccine Available at {k['name']}", color=discord.Color.green())
-                            embed.add_field(
-                                name='Date', value=k['date'], inline=False)
-                            embed.add_field(
-                                name='Address', value=k['address'], inline=False)
-                            embed.add_field(
-                                name='Pincode', value=k['pincode'], inline=False)
-                            embed.add_field(
-                                name='Available Capacity for Dose 1', value=k['available_capacity_dose1'], inline=False)
-                            embed.add_field(
-                                name='Available Capacity for Dose 2', value=k['available_capacity_dose2'], inline=False)
-                            embed.add_field(
-                                name='Minimum Age', value=k['min_age_limit'], inline=False)
-                            embed.add_field(
-                                name='Vaccine', value=k['vaccine'])
-                            if(k['fee_type'] == 'Paid'):
-                                embed.add_field(name='Fee type', value=str(
-                                    k['fee_type'])+'-Rs.'+str(k['fee']), inline=False)
-                            else:
-                                embed.add_field(name='Fee type', value=str(
-                                    k['fee_type']), inline=False)
-                            embed.add_field(name="Slots", value='\n'.join(
-                                k['slots']), inline=False)
-                            self.s_id.append(str(k['session_id']))
-                            fp = open('data/alerts.csv', 'r')
-                            fp2 = open('data/mypings.json', 'r')
-                            data = json.load(fp2)
-                            fp2.close()
-                            ch_list = [line.split(',')[1] for line in list(
-                                filter(None, fp.read().split('\n')))]
-                            for ch in ch_list:
-                                try:
-                                    await self.client.get_channel(int(ch)).send(embed=embed)
-                                except:
+        try:
+            dates = []
+            date = datetime.datetime.now(self.IST).strftime("%d-%m-%Y")
+            datetom = (datetime.datetime.now(self.IST) +
+                       datetime.timedelta(days=1)).strftime("%d-%m-%Y")
+            dateafter = (datetime.datetime.now(self.IST) +
+                         datetime.timedelta(days=2)).strftime("%d-%m-%Y")
+            if(datetime.datetime.now(self.IST).hour < 16):
+                dates = [date, datetom]
+            if(datetime.datetime.now(self.IST).hour >= 16):
+                dates = [datetom, dateafter]
+            #dates = [date, datetom]
+            d_ids = [276, 265, 294]
+            for j in d_ids:
+                if(j == 276):
+                    url = self.url1
+                if(j == 265):
+                    url = self.url2
+                if(j == 294):
+                    url = self.url3
+                for i in dates:
+                    headers = {"Accept-Language": "en-IN",
+                               'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
+                    data = {"district_id": j, "date": i}
+                    res = requests.get(url, params=data, headers=headers)
+                    #resp = res.json()
+                    # print(res.json())
+                    #print(res.status_code, j)
+                    if(res.status_code == 200):
+                        resp = res.json()
+                        for k in resp['sessions']:
+                            if(len(k) != 0 and k['session_id'] not in self.s_id):
+                                if(k['available_capacity_dose1'] >= 8 and k['min_age_limit'] < 45 and ((k['available_capacity_dose1'])-int(k['available_capacity_dose1'])) == 0):
+                                    embed = discord.Embed(
+                                        title=f"Vaccine Available at {k['name']}", color=discord.Color.green())
+                                    embed.add_field(
+                                        name='Date', value=k['date'], inline=False)
+                                    embed.add_field(
+                                        name='Vaccine', value=k['vaccine'])
+                                    embed.add_field(
+                                        name='Address', value=k['address'], inline=False)
+                                    embed.add_field(
+                                        name='Pincode', value=k['pincode'], inline=False)
+                                    embed.add_field(
+                                        name='Available Capacity for Dose 1', value=k['available_capacity_dose1'], inline=False)
+                                    embed.add_field(
+                                        name='Available Capacity for Dose 2', value=k['available_capacity_dose2'], inline=False)
+                                    embed.add_field(
+                                        name='Minimum Age', value=k['min_age_limit'], inline=False)
+                                    if(k['fee_type'] == 'Paid'):
+                                        embed.add_field(name='Fee type', value=str(
+                                            k['fee_type'])+'-Rs.'+str(k['fee']), inline=False)
+                                    else:
+                                        embed.add_field(name='Fee type', value=str(
+                                            k['fee_type']), inline=False)
+                                    embed.add_field(name="Slots", value='\n'.join(
+                                        k['slots']), inline=False)
+                                    self.s_id.append(str(k['session_id']))
+                                    if(str(k['pincode']) in self.data):
+                                        id_dict = self.data[str(k['pincode'])]
+                                    else:
+                                        id_dict = {}  # just to avoid name error in line 244
+                                    for ch in self.ch_list:
+                                        try:
+                                            await self.client.get_channel(int(ch)).send(embed=embed)
+                                        except:
+                                            continue
+                                        try:
+                                            guild_id = str(
+                                                self.client.get_channel(int(ch)).guild.id)
+                                            # if(str(k['pincode']) in self.data):
+                                            #     id_dict = self.data[str(k['pincode'])]
+                                            for uid in id_dict:
+                                                if(guild_id in str(id_dict[uid])):
+                                                    member_id = int(uid)
+                                                    memberMention = self.client.get_user(
+                                                        member_id).mention
+                                                    await self.client.get_channel(int(ch)).send(memberMention)
+                                        except:
+                                            continue
+                                    # await self.client.get_channel(841561036305465344).send(embed=embed)
+                                else:
                                     continue
-                                try:
-                                    guild_id = str(
-                                        self.client.get_channel(int(ch)).guild.id)
-                                    if(str(k['pincode']) in data):
-                                        id_dict = data[str(k['pincode'])]
-                                        for uid in id_dict:
-                                            if(guild_id in str(id_dict[uid])):
-                                                member_id = int(uid)
-                                                memberMention = self.client.get_user(
-                                                    member_id).mention
-                                                await self.client.get_channel(int(ch)).send(memberMention)
-                                except:
-                                    continue
-                            # await client.get_channel(841561036305465344).send(embed=embed)
-                            fp.close()
-                        else:
-                            continue
-                else:
-                    await self.client.get_channel(841561036305465344).send("Flask died. Check ASAP")
-                    continue
+                    else:
+                        await self.client.get_channel(841561036305465344).send("API died lol")
+                        continue
+        except:
+            await self.client.get_channel(841561036305465344).send('Flask Down! <@771985293011058708> <@723377619420184668>!')
+            return
 
-    @tasks.loop(seconds=300)
+    @tasks.loop(hours=1)
     async def clear(self):
         self.s_id = []
         return
+
+    def updatecsvdata(self):
+        fp = open('data/alerts.csv', 'r')
+        self.ch_list = [line.split(',')[1] for line in list(
+            filter(None, fp.read().split('\n')))]
+        fp.close()
+
+    def updatejsondata(self):
+        fp = open('data/mypings.json', 'r')
+        self.data = json.load(fp)
+        fp.close()
 
 
 def setup(client):
