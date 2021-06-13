@@ -244,13 +244,14 @@ class Cowin(commands.Cog):
                                                     await self.client.get_channel(int(ch)).send(memberMention)
                                         except:
                                             continue
-                                    # await client.get_channel(841561036305465344).send(embed=embed)
+                                    # await self.client.get_channel(841561036305465344).send(embed=embed)
                                 else:
                                     continue
                     else:
-                        await self.client.get_channel(841561036305465344).send("Flask died. Check ASAP")
+                        await self.client.get_channel(841561036305465344).send("API died lol")
                         continue
         except:
+            await self.client.get_channel(841561036305465344).send('Flask Down! <@771985293011058708> <@723377619420184668>!')
             return
 
     @tasks.loop(hours=1)
