@@ -252,7 +252,7 @@ class Cowin(commands.Cog):
             await self.client.get_channel(841561036305465344).send('Flask Down! <@771985293011058708> <@723377619420184668>!')
             return
 
-    @tasks.loop(hours=1)
+    @tasks.loop(hours=2)
     async def clear(self):
         self.s_id = []
         return
