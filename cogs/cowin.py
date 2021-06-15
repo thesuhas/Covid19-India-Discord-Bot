@@ -21,8 +21,6 @@ class Cowin(commands.Cog):
         self.url3 = os.getenv('url3')
         self.url = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict"
         self.IST = pytz.timezone('Asia/Kolkata')
-        
-
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -168,9 +166,9 @@ class Cowin(commands.Cog):
             dates = []
             date = datetime.datetime.now(self.IST).strftime("%d-%m-%Y")
             datetom = (datetime.datetime.now(self.IST) +
-                    datetime.timedelta(days=1)).strftime("%d-%m-%Y")
+                       datetime.timedelta(days=1)).strftime("%d-%m-%Y")
             dateafter = (datetime.datetime.now(self.IST) +
-                        datetime.timedelta(days=2)).strftime("%d-%m-%Y")
+                         datetime.timedelta(days=2)).strftime("%d-%m-%Y")
             if(datetime.datetime.now(self.IST).hour < 16):
                 dates = [date, datetom]
             if(datetime.datetime.now(self.IST).hour >= 16):
@@ -186,7 +184,7 @@ class Cowin(commands.Cog):
                     url = self.url3
                 for i in dates:
                     headers = {"Accept-Language": "en-IN",
-                            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
+                               'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
                     data = {"district_id": j, "date": i}
                     res = requests.get(url, params=data, headers=headers)
                     #resp = res.json()
@@ -195,7 +193,7 @@ class Cowin(commands.Cog):
                     if(res.status_code == 200):
                         resp = res.json()
                         for k in resp['sessions']:
-                            if(len(k) != 0 and k['session_id'] not in self.s_id):
+                            if(len(k) != 0 and k['session_id'] not in reversed(self.s_id)):
                                 if(k['available_capacity_dose1'] >= 8 and k['min_age_limit'] < 45 and ((k['available_capacity_dose1'])-int(k['available_capacity_dose1'])) == 0):
                                     embed = discord.Embed(
                                         title=f"Vaccine Available at {k['name']}", color=discord.Color.green())
@@ -225,7 +223,7 @@ class Cowin(commands.Cog):
                                     if(str(k['pincode']) in self.data):
                                         id_dict = self.data[str(k['pincode'])]
                                     else:
-                                        id_dict = {} #just to avoid name error in line 244
+                                        id_dict = {}  # just to avoid name error in line 244
                                     for ch in self.ch_list:
                                         try:
                                             await self.client.get_channel(int(ch)).send(embed=embed)
@@ -254,21 +252,21 @@ class Cowin(commands.Cog):
             await self.client.get_channel(841561036305465344).send('Flask Down! <@771985293011058708> <@723377619420184668>!')
             return
 
-    @tasks.loop(hours=1)
+    @tasks.loop(hours=5)
     async def clear(self):
         self.s_id = []
         return
 
     def updatecsvdata(self):
         fp = open('data/alerts.csv', 'r')
-        self.ch_list = [line.split(',')[1] for line in list(filter(None, fp.read().split('\n')))]
+        self.ch_list = [line.split(',')[1] for line in list(
+            filter(None, fp.read().split('\n')))]
         fp.close()
 
     def updatejsondata(self):
         fp = open('data/mypings.json', 'r')
         self.data = json.load(fp)
         fp.close()
-
 
 
 def setup(client):
