@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import os
 
+
 class Dev(commands.Cog):
     def __init__(self, client):
         self.client = client
@@ -47,7 +48,11 @@ class Dev(commands.Cog):
             ch_list = [line.split(',')[1] for line in list(
                 filter(None, fp.read().split('\n')))]
             for ch in ch_list:
-                await self.client.get_channel(int(ch)).send(f"**NEW ALERT FROM THE DEVS**\n\n{msg}")
+                try:
+                    await self.client.get_channel(int(ch)).send(f"**NEW ALERT FROM THE DEVS**\n\n{msg}")
+                except:
+                    await self.client.get_channel(841561036305465344).send('Announcement failed once')
+                    continue
             await ctx.send("Announcement sent")
             fp.close()
         else:
@@ -72,8 +77,6 @@ class Dev(commands.Cog):
             await ctx.send("Message sent")
         else:
             await ctx.send("You do not have the permission to execute this command")
-
-
 
 
 def setup(client):
