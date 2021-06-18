@@ -21,7 +21,7 @@ pipeline {
         stage('Stopping earlier worker'){
             steps{
                 sh '''
-                pkill -f bot.py || true
+                sudo pkill -f bot.py || true
  '''
 
 
