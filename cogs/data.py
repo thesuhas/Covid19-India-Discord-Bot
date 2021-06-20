@@ -7,18 +7,19 @@ from babel.numbers import format_currency
 import datetime
 import io
 
+
 class Data(commands.Cog):
     # Initialisation command
     def __init__(self, client):
         self.client = client
 
         # Filenames for updation
-        self.filename = './data/states.csv'
-        self.file_daily = './data/states_yesterday.csv'
-        
+        self.filename = 'data/states.csv'
+        self.file_daily = 'data/states_yesterday.csv'
+
         # Mapping for queries to states_yesterday
         self.mapp = {"total": 'TT', 'andaman and nicobar islands': 'AN', "andhra pradesh": 'AP', "arunachal pradesh": 'AR', "assam": 'AS', "bihar": 'BR', "chandigarh": 'CH', "chhattisgarh": 'CT', "dadra and nagar haveli and daman and diu": 'DN', "dadra and nagar haveli and daman and diu": 'DD', "delhi": 'DL', "goa": 'GA', "gujarat": 'GJ', "haryana": 'HR', "himachal pradesh": 'HP', "jammu and kashmir": 'JK', "jharkhand": 'JH',
-            "karnataka": 'KA', "kerala": 'KL', "ladakh": 'LA', "lakshadweep": 'LD', "madhya pradesh": 'MP', "maharashtra": 'MH', "manipur": 'MN', "meghalaya": 'ML', "mizoram": 'MZ', "nagaland": 'NL', "odisha": 'OR', "puducherry": 'PY', "punjab": 'PB', "rajasthan": 'RJ', "sikkim": 'SK', "tamil nadu": 'TN', "telangana": 'TG', "tripura": 'TR', "uttar pradesh": 'UP', "uttarakhand": 'UT', "west bengal": 'WB', "state unassigned": 'UN'}
+                     "karnataka": 'KA', "kerala": 'KL', "ladakh": 'LA', "lakshadweep": 'LD', "madhya pradesh": 'MP', "maharashtra": 'MH', "manipur": 'MN', "meghalaya": 'ML', "mizoram": 'MZ', "nagaland": 'NL', "odisha": 'OR', "puducherry": 'PY', "punjab": 'PB', "rajasthan": 'RJ', "sikkim": 'SK', "tamil nadu": 'TN', "telangana": 'TG', "tripura": 'TR', "uttar pradesh": 'UP', "uttarakhand": 'UT', "west bengal": 'WB', "state unassigned": 'UN'}
 
         # Initialising dfs
         self.df = 0
@@ -41,7 +42,7 @@ class Data(commands.Cog):
         # cowin.Cowin.clear.start()
 
         test = requests.get(
-        'https://api.covid19india.org/csv/latest/state_wise.csv')
+            'https://api.covid19india.org/csv/latest/state_wise.csv')
         test = str(test.text)
 
         data = io.StringIO(test)
@@ -141,13 +142,13 @@ class Data(commands.Cog):
                                     1:-3] + '\n(+' + format_currency(int(self.df_daily[self.df_daily['Status'] == 'Deceased'][self.mapp[state]]), 'INR', locale='en_IN')[1:-3] + ')', inline=False)
                     embed.set_footer(text=self.footer)
                     await ctx.send(embed=embed)
-    
+
     @commands.command(aliases=['india'])
     async def india_command(self, ctx):
         entry = self.df.loc[self.df['State'] == 'total']
         #m = f"**Covid Cases in the country:**\nConfirmed: {entry['Confirmed'].values[0]}\nRecovered: {entry['Recovered'].values[0]}\nDeaths: {entry['Deaths'].values[0]}\nActive: {entry['Active'].values[0]}"
         embed = discord.Embed(title="Cases in the Country",
-                            color=discord.Color.green())
+                              color=discord.Color.green())
         embed.add_field(name='Active', value=format_currency(
             int(entry['Active'].values[0]), 'INR', locale='en_IN')[1:-3], inline=False)
         embed.add_field(name='Confirmed', value=format_currency(int(entry['Confirmed'].values[0]), 'INR', locale='en_IN')[
@@ -164,7 +165,7 @@ class Data(commands.Cog):
         await ctx.defer()
         entry = self.df.loc[self.df['State'] == 'total']
         embed = discord.Embed(title="Cases in the Country",
-                            color=discord.Color.green())
+                              color=discord.Color.green())
         embed.add_field(name='Active', value=format_currency(
             int(entry['Active'].values[0]), 'INR', locale='en_IN')[1:-3], inline=False)
         embed.add_field(name='Confirmed', value=format_currency(int(entry['Confirmed'].values[0]), 'INR', locale='en_IN')[
@@ -203,7 +204,7 @@ class Data(commands.Cog):
             df_daily.to_csv(self.file_daily)
             self.df_daily = df_daily
             print("df_daily Updated at: ", datetime.datetime.now())
-    
+
     @tasks.loop(seconds=1800)
     async def update(self):
         # Create basic data frame and store
@@ -223,6 +224,7 @@ class Data(commands.Cog):
         time = datetime.datetime.now() + datetime.timedelta(hours=5, minutes=30)
         time = time.strftime("%d-%b") + ' at ' + time.strftime("%I:%M %p")
         self.footer = f"Last Updated: {time}"
+
 
 def setup(client):
     client.add_cog(Data(client))
