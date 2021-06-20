@@ -31,7 +31,7 @@ pipeline {
         stage('starting updated worker'){
             steps{
                  sh 'JENKINS_NODE_COOKIE=dontKillMe'
-                sh 'JENKINS_NODE_COOKIE=dontKillMe && nohup python3 bot.py > $WORKSPACE/nohup.out 2>&1 &'
+                sh 'JENKINS_NODE_COOKIE=dontKillMe && python3 bot.py'
 
             }
             
