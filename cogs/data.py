@@ -80,7 +80,7 @@ class Data(commands.Cog):
         activity = discord.Activity(
             name="Plague Inc.", type=discord.ActivityType.playing)
         await self.client.change_presence(activity=activity)
-        await self.client.get_channel(841561036305465344).send(f"Bot is online")
+        await self.client.get_channel(841561036305465344).send(f"Bot is online from jenkins")
 
     @commands.command(aliases=['state'])
     async def state_command(self, ctx, *, state=''):
