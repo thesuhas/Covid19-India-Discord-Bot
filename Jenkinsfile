@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    environment {
+        WORKSPACE = '/var/lib/jenkins/workspace/covid_bot'
+    }
 
     stages {
         stage ('installing requirements'){
