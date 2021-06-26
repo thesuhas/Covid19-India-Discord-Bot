@@ -6,37 +6,39 @@ from cogs.helpers import Helpers
 from cogs.cowin import Cowin
 import subprocess
 import sys
+
+
 class Misc(commands.Cog):
     # Initialisation
     def __init__(self, client):
         self.client = client
 
-        
     @commands.command(aliases=['pull'])
     async def git_pull(self, ctx):
-        if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872) or (ctx.author.id == 771985293011058708)):   
+        if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872) or (ctx.author.id == 771985293011058708)):
             await ctx.send("Pulling repo from git")
             sys.stdout.flush()
             p = subprocess.Popen(['git', 'pull'], stdout=subprocess.PIPE)
-            for line in iter(p.stdout.readline,''):
+            for line in iter(p.stdout.readline, ''):
                 if not line:
                     break
                 await ctx.channel.send(str(line.rstrip(), 'utf-8', 'ignore'))
             sys.stdout.flush()
         else:
             await ctx.channel.send("You can't execute this command")
-            
+
     @commands.command(aliases=['restart'])
     async def _restart(self, ctx):
-        if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872) or (ctx.author.id == 771985293011058708)):   
+        if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872) or (ctx.author.id == 771985293011058708)):
             await ctx.send("sending files")
             with open('data/alerts.csv', 'r') as fp:
                 await self.client.get_channel(841561036305465344).send(file=discord.File(fp, 'alerts.csv'))
             with open('data/mypings.json', 'r') as fp:
                 await self.client.get_channel(841561036305465344).send(file=discord.File(fp, 'mypings.json'))
             await self.git_pull(ctx)
-            p = subprocess.Popen(['restart'])
-            sys.exit(0)
+            exec('pkill -f bot.py')
+            exec('python3 bot.py')
+            # sys.exit(0)
         else:
             await ctx.channel.send("NO")
 
@@ -56,7 +58,7 @@ class Misc(commands.Cog):
         }
         for ruleNo in rules:
             Embeds.add_field(name='\u200b', value="`" +
-                            str(ruleNo) + '`: ' + rules[ruleNo], inline=False)
+                             str(ruleNo) + '`: ' + rules[ruleNo], inline=False)
 
         guildObj = self.client.get_guild(742797665301168220)
         stark = guildObj.get_member(718845827413442692).mention
@@ -110,27 +112,28 @@ class Misc(commands.Cog):
     @cog_ext.cog_slash(name="help", description="Commands available from me")
     async def help_slash(self, ctx):
         await ctx.defer()
-        help_embed = discord.Embed(title="**Help**", color=discord.Color.green())
+        help_embed = discord.Embed(
+            title="**Help**", color=discord.Color.green())
         help_embed.add_field(
             name='**`.india`**', value='Get COVID-19 stats of the entire nation', inline=False)
         help_embed.add_field(name='**`.states`**',
-                            value='Get a list of states', inline=False)
+                             value='Get a list of states', inline=False)
         help_embed.add_field(
             name='**`.state {state}`**', value='Get cases in that particular state', inline=False)
         help_embed.add_field(
             name='**`.vaccine {pincode} [date]`**', value='Get vaccination slots near you. If `date` is not mentioned, it will take today\'s date', inline=False)
         help_embed.add_field(name='**`.beds {type of hospital}`**',
-                            value='Get available beds. Type can be `government/govt` or `private`(Only Bengaluru)', inline=False)
+                             value='Get available beds. Type can be `government/govt` or `private`(Only Bengaluru)', inline=False)
         help_embed.add_field(name='**`.alerts {channel name}`**',
-                            value='(only for members with \"Manage Server\" permissions) To register any channel on your server to get important alerts from the developers', inline=False)
+                             value='(only for members with \"Manage Server\" permissions) To register any channel on your server to get important alerts from the developers', inline=False)
         help_embed.add_field(name='**`.removealerts`**',
-                            value='(only for members with \"Manage Server\" permissions) To de-register any channel that was registered for alerts', inline=False)
+                             value='(only for members with \"Manage Server\" permissions) To de-register any channel that was registered for alerts', inline=False)
         help_embed.add_field(name='**`.invite`**',
-                            value='Get the invite link of the bot', inline=False)
+                             value='Get the invite link of the bot', inline=False)
         help_embed.add_field(name='**`.contribute`**',
-                            value='If you wish to contribute or learn about the bot', inline=False)
+                             value='If you wish to contribute or learn about the bot', inline=False)
         help_embed.add_field(name='**`.reachout`**',
-                            value='(only for Server Administrators) To reach out to the bot developers', inline=False)
+                             value='(only for Server Administrators) To reach out to the bot developers', inline=False)
         await ctx.send(embeds=[help_embed])
 
     @commands.command(aliases=['removealerts'])
@@ -166,7 +169,6 @@ class Misc(commands.Cog):
             Cowin.updatecsvdata(Cowin)
         else:
             await ctx.send("Looks like you don't have the manage server permissions to run this")
-
 
     @commands.command(aliases=['reachout'])
     async def reachout_command(self, ctx, *, msg: str = ''):
@@ -281,9 +283,6 @@ class Misc(commands.Cog):
             await ctx.send("You haven't set up for any pincode pings. To do so, use `.myping`")
         else:
             await ctx.send(f"You've set up to get pings for the following pincodes:\n{pinlist}")
-
-
-
 
 
 def setup(client):
