@@ -34,7 +34,7 @@ class Misc(commands.Cog):
                 await self.client.get_channel(841561036305465344).send(file=discord.File(fp, 'alerts.csv'))
             with open('data/mypings.json', 'r') as fp:
                 await self.client.get_channel(841561036305465344).send(file=discord.File(fp, 'mypings.json'))
-            await git_pull(ctx)
+            await self.git_pull(ctx)
             p = subprocess.Popen(['restart'])
             sys.exit(0)
         else:
