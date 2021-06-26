@@ -11,17 +11,11 @@ class Misc(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.command(aliases=['restart'])
-    async def _restart(self, ctx):
-        if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872) or (ctx.author.id == 771985293011058708)):   
-            p = subprocess.Popen(['restart'])
-            sys.exit(0)
-        else:
-            await ctx.channel.send("NO")
-
+        
     @commands.command(aliases=['pull'])
     async def git_pull(self, ctx):
         if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872) or (ctx.author.id == 771985293011058708)):   
+            await ctx.send("Pulling repo from git")
             sys.stdout.flush()
             p = subprocess.Popen(['git', 'pull'], stdout=subprocess.PIPE)
             for line in iter(p.stdout.readline,''):
@@ -31,7 +25,20 @@ class Misc(commands.Cog):
             sys.stdout.flush()
         else:
             await ctx.channel.send("You can't execute this command")
-
+            
+    @commands.command(aliases=['restart'])
+    async def _restart(self, ctx):
+        if((ctx.author.id == 554876169363652620) or (ctx.author.id == 723377619420184668) or (ctx.author.id == 718845827413442692) or (ctx.author.id == 404597472103759872) or (ctx.author.id == 771985293011058708)):   
+            await ctx.send("sending files")
+            with open('data/alerts.csv', 'r') as fp:
+                await self.client.get_channel(841561036305465344).send(file=discord.File(fp, 'alerts.csv'))
+            with open('data/mypings.json', 'r') as fp:
+                await self.client.get_channel(841561036305465344).send(file=discord.File(fp, 'mypings.json'))
+            await git_pull(ctx)
+            p = subprocess.Popen(['restart'])
+            sys.exit(0)
+        else:
+            await ctx.channel.send("NO")
 
     @commands.command(aliases=['contribute', 'support'])
     async def _support(self, ctx, *params):
