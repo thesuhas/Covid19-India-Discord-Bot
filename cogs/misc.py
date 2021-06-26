@@ -36,9 +36,7 @@ class Misc(commands.Cog):
             with open('data/mypings.json', 'r') as fp:
                 await self.client.get_channel(841561036305465344).send(file=discord.File(fp, 'mypings.json'))
             await self.git_pull(ctx)
-            exec('pkill -f bot.py')
-            exec('python3 bot.py')
-            # sys.exit(0)
+            sys.exit(1)
         else:
             await ctx.channel.send("NO")
 
