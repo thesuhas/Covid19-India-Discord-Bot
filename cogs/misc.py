@@ -6,6 +6,7 @@ from cogs.helpers import Helpers
 from cogs.cowin import Cowin
 import subprocess
 import sys
+import os
 
 
 class Misc(commands.Cog):
@@ -36,7 +37,7 @@ class Misc(commands.Cog):
             with open('data/mypings.json', 'r') as fp:
                 await self.client.get_channel(841561036305465344).send(file=discord.File(fp, 'mypings.json'))
             await self.git_pull(ctx)
-            p = subprocess.Popen(['kill', '1'], stdout=subprocess.PIPE)
+            os.system('kill 1')
         else:
             await ctx.channel.send("NO")
 
