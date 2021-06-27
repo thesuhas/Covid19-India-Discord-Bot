@@ -37,7 +37,7 @@ class Misc(commands.Cog):
             with open('data/mypings.json', 'r') as fp:
                 await self.client.get_channel(841561036305465344).send(file=discord.File(fp, 'mypings.json'))
             await self.git_pull(ctx)
-            os.system('kill 1')
+            p = subprocess.Popen(['kill', '1'], stdout=subprocess.PIPE)
         else:
             await ctx.channel.send("NO")
 
