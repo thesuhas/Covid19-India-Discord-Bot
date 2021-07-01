@@ -109,6 +109,16 @@ class Events(commands.Cog):
         fp.close()
         Cowin.updatecsvdata(Cowin)
 
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx, error):
+        if isinstance(error, commands.NoPrivateMessage):
+            return await ctx.send("This command dont work in DMs channel")
+        elif isinstance(error, commands.MissingPermissions):
+            return await ctx.send("It looks like you are missing some permissions\n `{}`".format(', '.join(error.missing_perms)))
+        elif isinstance(error, commands.BotMissingPermissions):
+            string = error.missing_perms
+            return await ctx.send(ctx.send("Bot Missing Permissions\n`{}`".format(', '.join(string))))
+
 
 def setup(client):
     client.add_cog(Events(client))
