@@ -134,7 +134,8 @@ class Misc(commands.Cog):
         help_embed.add_field(name='**`.reachout`**',
                              value='(only for Server Administrators) To reach out to the bot developers', inline=False)
         await ctx.send(embeds=[help_embed])
-
+    
+    @commands.guild_only()
     @commands.command(aliases=['removealerts'])
     async def removealerts_command(self, ctx, dest: discord.TextChannel = None):
         found = False
@@ -168,7 +169,8 @@ class Misc(commands.Cog):
             Cowin.updatecsvdata(Cowin)
         else:
             await ctx.send("Looks like you don't have the manage server permissions to run this")
-
+    
+    @commands.guild_only()
     @commands.command(aliases=['reachout'])
     async def reachout_command(self, ctx, *, msg: str = ''):
         if(msg == ''):
@@ -180,7 +182,8 @@ class Misc(commands.Cog):
             await self.client.get_channel(841560857602162698).send(f"Reachout from `{ctx.guild.name}`, guild-ID: `{ctx.guild.id}`, channel-ID: `{ctx.channel.id}`\n\n{msg}")
         else:
             await ctx.send("Only members with administrator perms can run this command. Contact your server admin or anyone with a role who has administrator privileges. You can always contact us on `covidindiabot@gmail.com`")
-
+    
+    @commands.guild_only()
     @commands.command(aliases=['alerts'])
     async def alerts_command(self, ctx, dest: discord.TextChannel = None):
         if(dest == None):
@@ -206,7 +209,8 @@ class Misc(commands.Cog):
                 await ctx.send("I don't have enough permissions in that channel. Enable `Send Messages`, `Embed Links` and `Attach Files` for me")
         else:
             await ctx.send("Looks like you don't have the manage server permissions to run this")
-
+    
+    @commands.guild_only()
     @commands.command(aliases=['myping', 'mp'])
     async def personalpingcommand(self, ctx, pincode: int = 0):
         await ctx.channel.trigger_typing()
@@ -241,7 +245,8 @@ class Misc(commands.Cog):
             await ctx.send(f"You'll now get a ping every time there's a slot open in pincode: **{pincode}**")
         else:
             await ctx.send("Pincode invalid, try again")
-
+    
+    @commands.guild_only()
     @commands.command(aliases=['rp', 'removeping'])
     async def removepingcommand(self, ctx, pincode: int = 0):
         await ctx.channel.trigger_typing()
