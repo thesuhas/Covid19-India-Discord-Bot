@@ -253,7 +253,7 @@ class Cowin(commands.Cog):
                 self.flaskFailCount += 1
             else:
                 self.flaskFailCount = 0
-                await self.client.get_channel(841561036305465344).send('Flask Down!')
+                await self.client.get_channel(841561036305465344).send('Flask Down <@771985293011058708> <@723377619420184668>!')
             return
 
     @tasks.loop(hours=24)
