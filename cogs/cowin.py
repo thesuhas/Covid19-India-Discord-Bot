@@ -14,7 +14,7 @@ class Cowin(commands.Cog):
     def __init__(self, client):
         self.client = client
         self.s_id = []
-
+        self.flaskFailCount = 0
         # URLs
         self.url1 = os.getenv('url1')
         self.url2 = os.getenv('url2')
@@ -249,11 +249,16 @@ class Cowin(commands.Cog):
                         await self.client.get_channel(841561036305465344).send("API died lol")
                         continue
         except:
-            await self.client.get_channel(841561036305465344).send('Flask Down! <@771985293011058708> <@723377619420184668>!')
+            if self.flaskFailCount < 20:
+                self.flaskFailCount += 1
+            else:
+                self.flaskFailCount = 0
+                await self.client.get_channel(841561036305465344).send('Flask Down!')
             return
 
     @tasks.loop(hours=24)
     async def clear(self):
+        self.flaskFailCount = 0
         self.s_id = []
         return
 
