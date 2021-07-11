@@ -248,12 +248,12 @@ class Cowin(commands.Cog):
                     else:
                         await self.client.get_channel(841561036305465344).send("API died lol")
                         continue
-        except:
+        except Exception as e:
             if self.flaskFailCount < 20:
                 self.flaskFailCount += 1
             else:
                 self.flaskFailCount = 0
-                await self.client.get_channel(841561036305465344).send('Flask Down <@771985293011058708> <@723377619420184668>!')
+                await self.client.get_channel(841561036305465344).send(e)
             return
 
     @tasks.loop(hours=24)
