@@ -1,3 +1,4 @@
+import asyncio
 import json
 import discord
 from discord.ext import commands, tasks
@@ -160,7 +161,7 @@ class Cowin(commands.Cog):
             else:
                 await ctx.send("No available vaccination center")
 
-    @tasks.loop(seconds=3)
+    @tasks.loop(seconds=20)
     async def alert(self):
         try:
             dates = []
@@ -175,16 +176,13 @@ class Cowin(commands.Cog):
                 dates = [datetom, dateafter]
             #dates = [date, datetom]
             d_ids = [276, 265, 294]
+            url = self.url
+            headers = {
+                "Accept-Language": "en-IN", 
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'
+            }
             for j in d_ids:
-                if(j == 276):
-                    url = self.url1
-                if(j == 265):
-                    url = self.url2
-                if(j == 294):
-                    url = self.url3
                 for i in dates:
-                    headers = {"Accept-Language": "en-IN",
-                               'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
                     data = {"district_id": j, "date": i}
                     res = requests.get(url, params=data, headers=headers)
                     #resp = res.json()
