@@ -18,4 +18,4 @@ for filename in os.listdir('./cogs'):
         client.load_extension(f"cogs.{filename[:-3]}")
 
 # Runs the bot
-client.run(os.getenv('TOKEN'))
+# client.run(os.getenv('TOKEN'))
