@@ -1,8 +1,8 @@
-import discord
-from discord.ext import commands
-from discord_slash import SlashCommand
-import os
-from dotenv import load_dotenv
+# import discord
+# from discord.ext import commands
+# from discord_slash import SlashCommand
+# import os
+# from dotenv import load_dotenv
 
 # Create a bot instance and sets a command prefix
 client = commands.Bot(command_prefix='.', intents=discord.Intents.all())
